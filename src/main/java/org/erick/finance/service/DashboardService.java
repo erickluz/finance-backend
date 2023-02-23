@@ -3,7 +3,9 @@ package org.erick.finance.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -68,6 +70,15 @@ public class DashboardService {
 	
 	public SpendingCategoryDTO getSpendingCategoryChart() {
 		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategory());
+	}
+	
+	public SpendingCategoryDTO getSpendingCategoryChartPerDate(String initialDate, String finalDate) {
+		LocalDateTime lInitialDate = LocalDateTime.parse(initialDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+		LocalDateTime lFinalDate = LocalDateTime.parse(finalDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+		lInitialDate = lInitialDate.withDayOfMonth(1);
+		LocalDate lFinal = lFinalDate.toLocalDate(); 
+		lFinalDate = lFinalDate.withDayOfMonth(lFinalDate.getMonth().length(lFinal.isLeapYear()));
+		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate));
 	}
 
 }

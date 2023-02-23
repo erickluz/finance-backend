@@ -28,7 +28,6 @@ public class CategoryResource {
 	@CrossOrigin(origins = "*")
 	@GetMapping
 	public ResponseEntity<List<SpendingCategory>> listAll() {
-		System.out.println("GET");
 		List<SpendingCategory> categories = categoryService.listAll();
 		return ResponseEntity.ok(categories);
 	}
@@ -36,14 +35,12 @@ public class CategoryResource {
 	@CrossOrigin
 	@GetMapping(value="/{id}")
 	public ResponseEntity<?> buscar(@PathVariable Long id){
-		System.out.println("GET");
 		return ResponseEntity.ok(categoryService.findById(id));
 	}
 	
 	@CrossOrigin
 	@PostMapping
 	public ResponseEntity<SpendingCategory> inserir(@RequestBody SpendingCategory obj){
-		System.out.println("POST");
 		categoryService.save(obj);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build(); 
@@ -52,7 +49,6 @@ public class CategoryResource {
 	@CrossOrigin
 	@PutMapping(value="/{id}")
 	public ResponseEntity<Void> update(@RequestBody SpendingCategory obj, @PathVariable Long id){
-		System.out.println("UPDATE");
 		categoryService.save(obj);
 		return ResponseEntity.noContent().build();
 	}
@@ -60,7 +56,6 @@ public class CategoryResource {
 	@CrossOrigin
 	@DeleteMapping(value="/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id){
-		System.out.println("DELETE");
 		categoryService.delete(id);
 		return ResponseEntity.noContent().build();
 	}

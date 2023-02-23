@@ -25,7 +25,6 @@ public class UtilService {
 			dates.add(new DateDTO(monthNumber, shortDate, stringDate));
 			actualDate = actualDate.plusMonths(1L);
 		}
-		System.out.println(dates);
 		return dates;
 	}
 	

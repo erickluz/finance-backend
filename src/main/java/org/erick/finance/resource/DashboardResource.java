@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/dashboard")
@@ -32,8 +33,14 @@ public class DashboardResource {
 	
 	@CrossOrigin
 	@GetMapping("/spendingchart")
-	public ResponseEntity<SpendingCategoryDTO> getSpendingCategoryChart() {
-		return ResponseEntity.ok(dashboardService.getSpendingCategoryChart());
+	public ResponseEntity<SpendingCategoryDTO> getSpendingCategoryChart(
+			@RequestParam(required = false) String initialDate, 
+			@RequestParam(required = false) String finalDate) {
+		if (initialDate == null || initialDate.equals("") || finalDate == null || finalDate.equals("")) {
+			return ResponseEntity.ok(dashboardService.getSpendingCategoryChart()); 
+		} else {
+			return ResponseEntity.ok(dashboardService.getSpendingCategoryChartPerDate(initialDate, finalDate));
+		}
 	}
 
 }

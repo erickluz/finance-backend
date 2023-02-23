@@ -39,8 +39,20 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 			+ "ORDER BY YEAR(s.date), MONTH(s.date) ")
 	public List<Integer> getListSpending();
 	
-	@Query("SELECT new org.erick.finance.dto.ItemCategoryDTO(SUM(s.value), c.name) FROM Spending s INNER JOIN s.category c WHERE MONTH(s.date) = MONTH(current_date) GROUP BY c.name ")
+	@Query("SELECT new org.erick.finance.dto.ItemCategoryDTO(SUM(s.value), c.name) "
+			+ "FROM Spending s "
+			+ "INNER JOIN s.category c "
+			+ "WHERE MONTH(s.date) = MONTH(current_date) "
+			+ "GROUP BY c.name ")
 	public List<ItemCategoryDTO> getListSpendingCategory();
+	
+	
+	@Query("SELECT new org.erick.finance.dto.ItemCategoryDTO(SUM(s.value), c.name) "
+			+ "FROM Spending s "
+			+ "INNER JOIN s.category c "
+			+ "WHERE s.date BETWEEN :initialDate AND :finalDate "
+			+ "GROUP BY c.name ")
+	public List<ItemCategoryDTO> getListSpendingCategoryPerDate(LocalDateTime initialDate, LocalDateTime finalDate);
 	
 	@Query(value = "select count(*) from ("
 			+ "SELECT  extract(MONTH from s.date)"
