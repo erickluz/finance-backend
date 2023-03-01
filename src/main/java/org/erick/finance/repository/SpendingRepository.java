@@ -17,8 +17,8 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 	public BigDecimal getTotalSpendingByMonth();
 	@Query("SELECT SUM(s.value) "
 			+ "		FROM  Spending s "
-			+ "		WHERE s.date <= current_date ")
-	public BigDecimal getTotalSpending();
+			+ "		WHERE s.date <= :date ")
+	public BigDecimal getTotalSpending(LocalDateTime date);
 
 	public Spending findTopByOrderByDateAsc();
 	public Spending findTopByOrderByDateDesc();

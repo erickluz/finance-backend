@@ -25,6 +25,6 @@ public interface RevenueRepository extends JpaRepository<Revenue, Long>{
 	@Query("SELECT "
 			+ " SUM(r.value) "
 			+ " FROM Revenue r "
-			+ " WHERE r.date <= current_date")
-	BigDecimal getTotalRevenue();
+			+ " WHERE r.date <= :date")
+	BigDecimal getTotalRevenue(LocalDateTime date);
 }
