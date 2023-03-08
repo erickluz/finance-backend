@@ -2,13 +2,19 @@ package org.erick.finance.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,4 +34,13 @@ public class Spending {
 	@JoinColumn(name = "idCategory")
 	@ManyToOne
 	private SpendingCategory category;
+	@JsonIgnore
+	private Short type;
+	@JsonIgnore
+	@JoinColumn(name = "idSpendingGroup")
+	@ManyToOne
+	private Spending spendingGroup;
+	@JsonIgnore
+	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL)
+	private List<Spending> spendingsInsallments = new ArrayList<>();
 }

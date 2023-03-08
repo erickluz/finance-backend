@@ -55,8 +55,8 @@ public class SpendingResource {
 	
 	
 	@PutMapping(value="/{id}")
-	public ResponseEntity<Void> update(@RequestBody Spending obj, @PathVariable Long id){
-		spendingService.save(obj);
+	public ResponseEntity<Void> update(@RequestBody SpendingDTO obj, @PathVariable Long id) throws Exception{
+		spendingService.update(obj);
 		return ResponseEntity.noContent().build();
 	}
 	
@@ -78,7 +78,7 @@ public class SpendingResource {
 					String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 					String value = "R$ " + spending.getValue();
 					String categoria = spending.getCategory().getName();
-					return new SpendingDTO(spending.getId(), spending.getName(), date, value, categoria);
+					return new SpendingDTO(spending.getId(), spending.getName(), date, value, categoria, null);
 				})
 				.collect(Collectors.toList());
 		return spendings;
@@ -89,6 +89,6 @@ public class SpendingResource {
 		String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		String value = spending.getValue().toString();
 		String categoria = spending.getCategory().getId().toString();
-		return new SpendingDTO(spending.getId(), spending.getName(), date, value, categoria);
+		return new SpendingDTO(spending.getId(), spending.getName(), date, value, categoria, null);
 	}
 }

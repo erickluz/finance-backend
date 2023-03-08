@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.erick.finance.domain.BudgetChart;
 import org.erick.finance.domain.Stats;
+import org.erick.finance.domain.TypeSpending;
 import org.erick.finance.dto.SpendingCategoryDTO;
 import org.erick.finance.repository.RevenueRepository;
 import org.erick.finance.repository.SpendingRepository;
@@ -32,7 +33,7 @@ public class DashboardService {
 	
 	public Stats getStats() {
 		BigDecimal totalRevenue = revenueRepository.getTotalRevenueByMonth();
-		BigDecimal totalSpendingByMonth = spendingRepository.getTotalSpendingByMonth();
+		BigDecimal totalSpendingByMonth = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode());
 		BigDecimal balanceMonth = totalRevenue.subtract(totalSpendingByMonth);
 		BigDecimal budgetMoney = totalRevenue.subtract(GOAL_MONEY);
 		BigDecimal balanceGoalMonth = budgetMoney.subtract(totalSpendingByMonth); 
@@ -45,7 +46,7 @@ public class DashboardService {
 	private BigDecimal getTotalBalance() {
 		LocalDate lDate = LocalDate.now();
 		LocalDateTime date = LocalDateTime.now().withDayOfMonth(LocalDateTime.now().getMonth().length(lDate.isLeapYear()));
-		BigDecimal totalSpending = spendingRepository.getTotalSpending(date);
+		BigDecimal totalSpending = spendingRepository.getTotalSpending(date, TypeSpending.GROUPING.getCode());
 		Integer countMonths = spendingRepository.getCountMonts();
 		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(date);
 		totalRevenue = totalRevenue.subtract(GOAL_MONEY.multiply(BigDecimal.valueOf(countMonths.doubleValue())));
@@ -55,7 +56,7 @@ public class DashboardService {
 	public BudgetChart getBudgetChart() {
 		LocalDateTime initialDate = spendingRepository.findTopByOrderByDateAsc().getDate();
 		LocalDateTime finalDate = spendingRepository.findTopByOrderByDateDesc().getDate();
-		List<Double> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate)
+		List<Double> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate, TypeSpending.GROUPING.getCode())
 				.stream()
 				.map(s -> s.doubleValue())
 				.collect(Collectors.toList());
@@ -73,7 +74,7 @@ public class DashboardService {
 	}
 	
 	public SpendingCategoryDTO getSpendingCategoryChart() {
-		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategory());
+		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategory(TypeSpending.GROUPING.getCode()));
 	}
 	
 	public SpendingCategoryDTO getSpendingCategoryChartPerDate(String initialDate, String finalDate) {
@@ -82,7 +83,7 @@ public class DashboardService {
 		lInitialDate = lInitialDate.withDayOfMonth(1);
 		LocalDate lFinal = lFinalDate.toLocalDate(); 
 		lFinalDate = lFinalDate.withDayOfMonth(lFinalDate.getMonth().length(lFinal.isLeapYear()));
-		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate));
+		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode()));
 	}
 
 }

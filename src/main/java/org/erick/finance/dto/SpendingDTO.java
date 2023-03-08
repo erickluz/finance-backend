@@ -15,4 +15,5 @@ public class SpendingDTO {
 	private String date;
 	private String value;
 	private String idCategory;
+	private String parts;
 }
