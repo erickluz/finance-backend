@@ -31,20 +31,17 @@ public class SpendingResource {
 	@Autowired
 	private SpendingService spendingService;
 	
-	
 	@GetMapping
 	public ResponseEntity<List<SpendingDTO>> listAll(@RequestParam String date) {
 		List<SpendingDTO> spendings = listSpendingToDTO(date);
 		return ResponseEntity.ok(spendings);
 	}
 	
-	
 	@GetMapping(value="/{id}")
 	public ResponseEntity<SpendingDTO> buscar(@PathVariable Long id){
 		SpendingDTO spendingDTO = getSpendingDTO(spendingService.findById(id));
 		return ResponseEntity.ok(spendingDTO);
 	}
-
 	
 	@PostMapping
 	public ResponseEntity<Spending> inserir(@RequestBody SpendingDTO obj){
@@ -52,7 +49,6 @@ public class SpendingResource {
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build(); 
 	}
-	
 	
 	@PutMapping(value="/{id}")
 	public ResponseEntity<Void> update(@RequestBody SpendingDTO obj, @PathVariable Long id) throws Exception{
@@ -78,7 +74,9 @@ public class SpendingResource {
 					String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 					String value = "R$ " + spending.getValue();
 					String categoria = spending.getCategory().getName();
-					return new SpendingDTO(spending.getId(), spending.getName(), date, value, categoria, null);
+					String card = (spending.getCard() != null) ? spending.getCard().getIssuer() : "Sem Cartão";
+					String idCard = (spending.getCard() != null) ? spending.getCard().getId().toString() : "";
+					return new SpendingDTO(spending.getId().toString(), spending.getName(), date, value, categoria, null, idCard, card);
 				})
 				.collect(Collectors.toList());
 		return spendings;
@@ -89,6 +87,7 @@ public class SpendingResource {
 		String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 		String value = spending.getValue().toString();
 		String categoria = spending.getCategory().getId().toString();
-		return new SpendingDTO(spending.getId(), spending.getName(), date, value, categoria, null);
+		String card = (spending.getCard() != null) ? spending.getCard().getId().toString() : null;
+		return new SpendingDTO(spending.getId().toString(), spending.getName(), date, value, categoria, null, card, null);
 	}
 }

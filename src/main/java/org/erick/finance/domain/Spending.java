@@ -14,6 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -43,4 +46,8 @@ public class Spending {
 	@JsonIgnore
 	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL)
 	private List<Spending> spendingsInsallments = new ArrayList<>();
+	@ManyToOne
+	@JoinColumn(name = "idCard")
+	@Fetch(FetchMode.JOIN)
+	private Card card;
 }

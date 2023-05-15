@@ -13,16 +13,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SpendingRepository extends JpaRepository<Spending, Long>{
 	
-	@Query("SELECT SUM(coalesce(s.value, 0.0)) "
+	@Query("SELECT coalesce(SUM(coalesce(s.value, 0.0)), 0.0) "
 			+ "		FROM Spending s "
+			+ "		LEFT JOIN s.card c "
 			+ "		WHERE MONTH(s.date) = MONTH(current_date)"
-			+ "		AND s.type <> :groupingType ")
+			+ "		AND s.type <> :groupingType "
+			+ "		AND (c.id IS NOT NULL AND c.isBudget = TRUE) ")
 	public BigDecimal getTotalSpendingByMonth(Short groupingType);
 	
-	@Query("SELECT SUM(s.value) "
+	@Query("SELECT coalesce(SUM(s.value), 0.0) "
 			+ "		FROM  Spending s "
+			+ "		LEFT JOIN s.card c "
 			+ "		WHERE s.date <= :date "
-			+ "		AND s.type <> :groupingType ")
+			+ "		AND s.type <> :groupingType "
+			+ " 	AND (c.id IS NOT NULL AND c.isBudget = TRUE) ")
 	public BigDecimal getTotalSpending(LocalDateTime date, Short groupingType);
 
 	public Spending findTopByOrderByDateAsc();
@@ -30,14 +34,18 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 	
 	@Query("SELECT s "
 			+ " FROM Spending s "
+			+ "	LEFT JOIN FETCH s.card c "
 			+ " WHERE MONTH(s.date) = :month "
-			+ "	AND s.type <> :groupingType ")
+			+ "	AND s.type <> :groupingType "
+			+ "	ORDER BY s.id")
 	public List<Spending> listByMonth(int month, Short groupingType);
 
 	@Query("SELECT SUM(s.value), MONTH(s.date), YEAR(s.date) "
 			+ " FROM Spending s "
+			+ "	LEFT JOIN s.card c "
 			+ " WHERE s.date BETWEEN :initialDate AND :finalDate "
 			+ "	AND s.type <> :groupingType "
+			+ " AND (c.id IS NOT NULL AND c.isBudget = TRUE) "
 			+ " GROUP BY MONTH(s.date), YEAR(s.date) "
 			+ " ORDER BY YEAR(s.date), MONTH(s.date) ")
 	public List<BigDecimal> getTotalSpendingPerMonth(LocalDateTime initialDate, LocalDateTime finalDate, Short groupingType);

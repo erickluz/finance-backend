@@ -10,10 +10,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SpendingDTO {
-	private Long id;
+	private String id;
 	private String name;
 	private String date;
 	private String value;
 	private String idCategory;
 	private String parts;
+	private String idCard;
+	private String card;
 }

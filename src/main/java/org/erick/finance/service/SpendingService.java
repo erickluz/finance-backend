@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.erick.finance.domain.Card;
 import org.erick.finance.domain.Spending;
 import org.erick.finance.domain.SpendingCategory;
 import org.erick.finance.domain.TypeSpending;
@@ -25,6 +26,8 @@ public class SpendingService {
 	private SpendingCategoryService categoryService;
 	@Autowired
 	private UtilService utilService;
+	@Autowired
+	private CardService cardService;
 	
 	public List<Spending> listAll() {
 		return rep.findAll();
@@ -40,15 +43,27 @@ public class SpendingService {
 	}
 	
 	public Spending save(SpendingDTO spendingDTO) {
-		System.out.println(spendingDTO.toString());
 		SpendingCategory spendingCategory = categoryService.findById(Long.valueOf(spendingDTO.getIdCategory()));
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]");
 		LocalDateTime date = LocalDateTime.parse(spendingDTO.getDate() + " 00:00:00", dateTimeFormatter);
-		BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));		
-		Spending spending = new Spending(spendingDTO.getId(), spendingDTO.getName(), date, value, spendingCategory, getType(spendingDTO), 
-				null, null);
+		BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
+		Card card = getCardSpending(spendingDTO);
+		Spending spending = new Spending(parseId(spendingDTO), spendingDTO.getName(), date, value, spendingCategory, getType(spendingDTO), 
+				null, null, card);
 		spending.setSpendingsInsallments(getParts(spendingDTO, spending));
 		return rep.save(spending);
+	}
+
+	private Card getCardSpending(SpendingDTO spendingDTO) {
+		Card card = null;
+		if (spendingDTO.getIdCard() != null) {
+			card = cardService.findById(Long.valueOf(spendingDTO.getIdCard()));
+		}
+		return card;
+	}
+
+	private Long parseId(SpendingDTO spendingDTO) {
+		return (spendingDTO.getId() != null && !spendingDTO.getId().equals("")) ? Long.valueOf(spendingDTO.getId()) : null;
 	}
 	
 	private List<Spending> getParts(SpendingDTO spendingDTO, Spending spending) {
@@ -67,7 +82,7 @@ public class SpendingService {
 			String name = spendingDTO.getName() + " (" + (i+1) + "/" + parts + ")";				
 			BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
 			SpendingCategory spendingCategory = categoryService.findById(Long.valueOf(spendingDTO.getIdCategory()));
-			Spending spendingPart = new Spending(null, name, date, value, spendingCategory, TypeSpending.PART.getCode(), spending, null);
+			Spending spendingPart = new Spending(null, name, date, value, spendingCategory, TypeSpending.PART.getCode(), spending, null, null);
 			date = date.plusMonths(1L);
 			partsSpending.add(spendingPart);
 		}
@@ -106,7 +121,7 @@ public class SpendingService {
 	}
 
 	public void update(SpendingDTO spendingDTO) throws Exception {
-		Spending spending = findById(spendingDTO.getId());
+		Spending spending = findById(parseId(spendingDTO));
 		if (spending == null) {
 			throw new Exception();
 		}

@@ -32,7 +32,6 @@ public class RevenueService {
 	}
 	
 	public Revenue save(RevenueDTO revenueDTO) {
-		System.out.println(revenueDTO.toString());
 		TypeRevenue typeRevenue = typeRevenueService.findById(Long.valueOf(revenueDTO.getIdType()));
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]");
 		LocalDateTime date = LocalDateTime.parse(revenueDTO.getDate() + " 00:00:00", dateTimeFormatter);

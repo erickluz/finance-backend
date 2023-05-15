@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -56,18 +57,30 @@ public class DashboardService {
 	public BudgetChart getBudgetChart() {
 		LocalDateTime initialDate = spendingRepository.findTopByOrderByDateAsc().getDate();
 		LocalDateTime finalDate = spendingRepository.findTopByOrderByDateDesc().getDate();
-		List<Double> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate, TypeSpending.GROUPING.getCode())
+		List<BigDecimal> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate, TypeSpending.GROUPING.getCode())
 				.stream()
-				.map(s -> s.doubleValue())
+				.map(s -> s.setScale(2, RoundingMode.HALF_DOWN))
 				.collect(Collectors.toList());
-		List<Double> budgets = revenueRepository.getTotalRevenuePerMonth(initialDate, finalDate)
+		List<BigDecimal> budgets = revenueRepository.getTotalRevenuePerMonth(initialDate, finalDate)
 				.stream()
-				.map(s -> s.doubleValue() - GOAL_MONEY.doubleValue())
+				.map(s -> s.subtract(GOAL_MONEY).setScale(2, RoundingMode.HALF_DOWN))
 				.collect(Collectors.toList());
+		List<BigDecimal> percentBudget = getPercentBudgetByMonth(spendings, budgets);
 		List<String> dates = spendingService.getListDatesSpending();
-		return new BudgetChart(spendings, budgets, dates);
+		return new BudgetChart(spendings, budgets, percentBudget, dates);
 	}
 	
+	private List<BigDecimal> getPercentBudgetByMonth(List<BigDecimal> spendings, List<BigDecimal> budgets) {
+		List<BigDecimal> percentsBudgets = new ArrayList<>();
+		int i = 0;
+		for (BigDecimal spending : spendings) {
+			BigDecimal budgetMoney = budgets.get(i++).setScale(2);
+			BigDecimal percent = spending.multiply(new BigDecimal(100).divide(budgetMoney, 2, RoundingMode.HALF_DOWN));
+			percentsBudgets.add(percent.setScale(2, RoundingMode.DOWN));
+		}
+		return percentsBudgets;
+	}
+
 	@SuppressWarnings("static-access")
 	public static String currencyFormat(BigDecimal n) {
 	    return NumberFormat.getInstance(new Locale("pt", "BR")).getCurrencyInstance().format(n);
