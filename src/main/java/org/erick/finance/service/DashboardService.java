@@ -2,11 +2,13 @@ package org.erick.finance.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -14,7 +16,9 @@ import java.util.stream.Collectors;
 import org.erick.finance.domain.BudgetChart;
 import org.erick.finance.domain.Stats;
 import org.erick.finance.domain.TypeSpending;
+import org.erick.finance.dto.ChartSpendingDayDTO;
 import org.erick.finance.dto.SpendingCategoryDTO;
+import org.erick.finance.dto.SpendingDayDTO;
 import org.erick.finance.repository.RevenueRepository;
 import org.erick.finance.repository.SpendingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,16 +78,14 @@ public class DashboardService {
 		List<BigDecimal> percentsBudgets = new ArrayList<>();
 		int i = 0;
 		for (BigDecimal spending : spendings) {
-			BigDecimal budgetMoney = budgets.get(i++).setScale(2);
-			BigDecimal percent = spending.multiply(new BigDecimal(100).divide(budgetMoney, 2, RoundingMode.HALF_DOWN));
-			percentsBudgets.add(percent.setScale(2, RoundingMode.DOWN));
+			if (i < budgets.size()) {
+				BigDecimal budgetMoney = budgets.get(i++).setScale(2);
+				spending = spending.multiply(new BigDecimal(100));
+				BigDecimal percent = spending.divide(budgetMoney, 2, RoundingMode.HALF_DOWN);
+				percentsBudgets.add(percent.setScale(2, RoundingMode.DOWN));
+			}
 		}
 		return percentsBudgets;
-	}
-
-	@SuppressWarnings("static-access")
-	public static String currencyFormat(BigDecimal n) {
-	    return NumberFormat.getInstance(new Locale("pt", "BR")).getCurrencyInstance().format(n);
 	}
 	
 	public SpendingCategoryDTO getSpendingCategoryChart() {
@@ -97,6 +99,37 @@ public class DashboardService {
 		LocalDate lFinal = lFinalDate.toLocalDate(); 
 		lFinalDate = lFinalDate.withDayOfMonth(lFinalDate.getMonth().length(lFinal.isLeapYear()));
 		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode()));
+	}
+	
+	public ChartSpendingDayDTO getSpendingPerDay() {
+		List<SpendingDayDTO> spendings = spendingRepository.getListSpendingPerDay();
+		return getSpendingPerDay(spendings);
+	}
+
+	private ChartSpendingDayDTO getSpendingPerDay(List<SpendingDayDTO> spendings) {
+		List<BigDecimal> values = new ArrayList<>();
+		List<String> days = new ArrayList<>();
+		int positionResults = 0;
+		int lastDay = LocalDate.now().withDayOfMonth(LocalDate.now().getMonth().length(LocalDate.now().isLeapYear())).getDayOfMonth();
+		LocalDateTime initialDate = LocalDateTime.now().withDayOfMonth(1);
+		for(int day = 1; day <= lastDay; day++) {
+			BigDecimal value = BigDecimal.ZERO;
+			String stringDay = getDayOfWeek(initialDate) + day;
+			if (spendings.size() > 0 && spendings.size() > positionResults && spendings.get(positionResults).getDate().getDayOfMonth() == day) {
+				value = spendings.get(positionResults++).getValue();
+			}
+			values.add(value);
+			days.add(stringDay);
+			initialDate = initialDate.plusDays(1L);
+		}
+		return new ChartSpendingDayDTO(values, days);
+	}
+
+	private String getDayOfWeek(LocalDateTime date) {
+		Date date2 = Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+	    Calendar calendar = Calendar.getInstance();
+	    calendar.setTime(date2);
+	    return calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, new Locale("PT-BR")) + "-";
 	}
 
 }

@@ -2,6 +2,7 @@ package org.erick.finance.resource;
 
 import org.erick.finance.domain.BudgetChart;
 import org.erick.finance.domain.Stats;
+import org.erick.finance.dto.ChartSpendingDayDTO;
 import org.erick.finance.dto.SpendingCategoryDTO;
 import org.erick.finance.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,12 @@ public class DashboardResource {
 		} else {
 			return ResponseEntity.ok(dashboardService.getSpendingCategoryChartPerDate(initialDate, finalDate));
 		}
+	}
+	
+	@CrossOrigin
+	@GetMapping("/spendingByDay")
+	public ResponseEntity<ChartSpendingDayDTO> getSpendingPerDay() {
+		return ResponseEntity.ok(dashboardService.getSpendingPerDay());
 	}
 
 }

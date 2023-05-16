@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.erick.finance.domain.Spending;
 import org.erick.finance.dto.ItemCategoryDTO;
+import org.erick.finance.dto.SpendingDayDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -81,5 +82,13 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 			+ "						GROUP BY extract(MONTH from s.date)	"
 			+ ") as months", nativeQuery = true)
 	public Integer getCountMonts();
+	
+	@Query("SELECT new org.erick.finance.dto.SpendingDayDTO(SUM(s.value), s.date) "
+			+ "FROM Spending s "
+			+ "WHERE MONTH(s.date) = MONTH(current_date) "
+			+ "AND s.type IN (1, 3)	"
+			+ "GROUP BY s.date "
+			+ "ORDER BY s.date ASC ")
+	public List<SpendingDayDTO> getListSpendingPerDay();
 
 }
