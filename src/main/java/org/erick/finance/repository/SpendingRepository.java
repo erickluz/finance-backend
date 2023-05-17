@@ -19,7 +19,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 			+ "		LEFT JOIN s.card c "
 			+ "		WHERE MONTH(s.date) = MONTH(current_date)"
 			+ "		AND s.type <> :groupingType "
-			+ "		AND (c.id IS NOT NULL AND c.isBudget = TRUE) ")
+			+ "		AND ((c.id IS NOT NULL AND c.isBudget = TRUE) OR (c.id IS NULL)) ")
 	public BigDecimal getTotalSpendingByMonth(Short groupingType);
 	
 	@Query("SELECT coalesce(SUM(s.value), 0.0) "
@@ -27,7 +27,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 			+ "		LEFT JOIN s.card c "
 			+ "		WHERE s.date <= :date "
 			+ "		AND s.type <> :groupingType "
-			+ " 	AND (c.id IS NOT NULL AND c.isBudget = TRUE) ")
+			+ "		AND ((c.id IS NOT NULL AND c.isBudget = TRUE) OR (c.id IS NULL)) ")
 	public BigDecimal getTotalSpending(LocalDateTime date, Short groupingType);
 
 	public Spending findTopByOrderByDateAsc();
@@ -46,7 +46,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>{
 			+ "	LEFT JOIN s.card c "
 			+ " WHERE s.date BETWEEN :initialDate AND :finalDate "
 			+ "	AND s.type <> :groupingType "
-			+ " AND (c.id IS NOT NULL AND c.isBudget = TRUE) "
+			+ " AND ((c.id IS NOT NULL AND c.isBudget = TRUE) OR (c.id IS NULL)) "
 			+ " GROUP BY MONTH(s.date), YEAR(s.date) "
 			+ " ORDER BY YEAR(s.date), MONTH(s.date) ")
 	public List<BigDecimal> getTotalSpendingPerMonth(LocalDateTime initialDate, LocalDateTime finalDate, Short groupingType);
