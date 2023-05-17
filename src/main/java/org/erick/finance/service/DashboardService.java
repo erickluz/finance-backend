@@ -92,15 +92,26 @@ public class DashboardService {
 		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategory(TypeSpending.GROUPING.getCode()));
 	}
 	
-	public SpendingCategoryDTO getSpendingCategoryChartPerDate(String initialDate, String finalDate) {
+	public SpendingCategoryDTO getSpendingCategoryChartPerDate(String initialDate, String finalDate, String budget) {
 		LocalDateTime lInitialDate = LocalDateTime.parse(initialDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
 		LocalDateTime lFinalDate = LocalDateTime.parse(finalDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
 		lInitialDate = lInitialDate.withDayOfMonth(1);
 		LocalDate lFinal = lFinalDate.toLocalDate(); 
 		lFinalDate = lFinalDate.withDayOfMonth(lFinalDate.getMonth().length(lFinal.isLeapYear()));
-		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode()));
+		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode(), isBudget(budget)));
 	}
 	
+	private Boolean isBudget(String budget) {
+		if (budget == null) {
+			return null;
+		}
+		switch (budget) {
+			case "Only budget" : return true;
+			case "No budget" : return false;
+			default : return null;
+		}
+	}
+
 	public ChartSpendingDayDTO getSpendingPerDay() {
 		List<SpendingDayDTO> spendings = spendingRepository.getListSpendingPerDay();
 		return getSpendingPerDay(spendings);

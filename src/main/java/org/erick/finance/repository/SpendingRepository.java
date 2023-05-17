@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SpendingRepository extends JpaRepository<Spending, Long>{
+public interface SpendingRepository extends JpaRepository<Spending, Long>, CustomSpendingRepository {
 	
 	@Query("SELECT coalesce(SUM(coalesce(s.value, 0.0)), 0.0) "
 			+ "		FROM Spending s "

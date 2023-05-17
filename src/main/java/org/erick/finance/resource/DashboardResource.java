@@ -36,11 +36,12 @@ public class DashboardResource {
 	@GetMapping("/spendingchart")
 	public ResponseEntity<SpendingCategoryDTO> getSpendingCategoryChart(
 			@RequestParam(required = false) String initialDate, 
-			@RequestParam(required = false) String finalDate) {
+			@RequestParam(required = false) String finalDate,
+			@RequestParam(required = false) String budget) {
 		if (initialDate == null || initialDate.equals("") || finalDate == null || finalDate.equals("")) {
 			return ResponseEntity.ok(dashboardService.getSpendingCategoryChart()); 
 		} else {
-			return ResponseEntity.ok(dashboardService.getSpendingCategoryChartPerDate(initialDate, finalDate));
+			return ResponseEntity.ok(dashboardService.getSpendingCategoryChartPerDate(initialDate, finalDate, budget));
 		}
 	}
 	
