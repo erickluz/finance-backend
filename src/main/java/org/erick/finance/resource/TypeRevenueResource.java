@@ -25,7 +25,7 @@ public class TypeRevenueResource {
 	@Autowired
 	private TypeRevenueService typeRevenueService;
 	
-	@CrossOrigin(origins = "*")
+	@CrossOrigin
 	@GetMapping
 	public ResponseEntity<List<TypeRevenue>> listAll() {
 		List<TypeRevenue> categories = typeRevenueService.listAll();
