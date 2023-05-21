@@ -27,4 +27,5 @@ public interface RevenueRepository extends JpaRepository<Revenue, Long>{
 			+ " FROM Revenue r "
 			+ " WHERE r.date <= :date")
 	BigDecimal getTotalRevenue(LocalDateTime date);
+	
 }

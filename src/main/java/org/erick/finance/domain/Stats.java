@@ -8,12 +8,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Stats {
-	private String revenueMonth;
-	private String spendingMonth;
-	private String balanceMonth;
-	private String balanceGoalMonth;
-	private String budgetMoney;
-	private String goalMoney;
-	private String budgetPercentage;
+	private String monthRevenue;
+	private String monthSpending;
+	private String monthBalance;
+	private String monthBalanceGoal;
+	private String monthBudgetMoney;
+	private String monthGoalMoney;
+	private String monthBudgetPercentage;
+	private String totalRevenue;
+	private String totalSpending;
+	private String totalGoalMoney;
+	private String totalBudgetBalance;
 	private String totalBalance;
 }

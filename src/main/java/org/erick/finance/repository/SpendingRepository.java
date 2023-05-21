@@ -81,7 +81,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 			+ "						WHERE s.date <= current_date "
 			+ "						GROUP BY extract(MONTH from s.date)	"
 			+ ") as months", nativeQuery = true)
-	public Integer getCountMonts();
+	public Integer getCountMonths();
 	
 	@Query("SELECT new org.erick.finance.dto.SpendingDayDTO(SUM(s.value), s.date) "
 			+ "FROM Spending s "
