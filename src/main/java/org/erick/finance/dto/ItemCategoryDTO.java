@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class ItemCategoryDTO {
 	private Double value;
 	private String name;
+	private String percent;
 	
 	public ItemCategoryDTO(BigDecimal value, String name) {
 		this.value = value.doubleValue();

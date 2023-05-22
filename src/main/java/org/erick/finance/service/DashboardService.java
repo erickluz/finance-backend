@@ -109,7 +109,14 @@ public class DashboardService {
 		lInitialDate = lInitialDate.withDayOfMonth(1);
 		LocalDate lFinal = lFinalDate.toLocalDate(); 
 		lFinalDate = lFinalDate.withDayOfMonth(lFinalDate.getMonth().length(lFinal.isLeapYear()));
-		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode(), isBudget(budget)));
+		SpendingCategoryDTO spendingCategory = new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode(), isBudget(budget)));
+		BigDecimal total = spendingCategory.getItens().stream().map(i -> BigDecimal.valueOf(i.getValue())).reduce(BigDecimal.ZERO, BigDecimal::add);
+		spendingCategory.getItens()
+		.stream()
+		.forEach(i -> 
+			i.setPercent(( (BigDecimal.valueOf(i.getValue()).multiply(BigDecimal.valueOf(100))).divide(total, RoundingMode.HALF_DOWN).toString() + "%"))
+		);
+		return spendingCategory;
 	}
 	
 	private Boolean isBudget(String budget) {
