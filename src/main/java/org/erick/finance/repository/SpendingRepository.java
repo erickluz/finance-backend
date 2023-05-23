@@ -86,6 +86,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	@Query("SELECT new org.erick.finance.dto.SpendingDayDTO(SUM(s.value), s.date) "
 			+ "FROM Spending s "
 			+ "WHERE MONTH(s.date) = MONTH(current_date) "
+			+ "	AND YEAR(s.date) = YEAR(current_date) "
 			+ "AND s.type IN (1, 3)	"
 			+ "GROUP BY s.date "
 			+ "ORDER BY s.date ASC ")

@@ -27,7 +27,7 @@ public class DashboardResource {
 	}
 	
 	@CrossOrigin
-	@GetMapping("/budget")
+	@GetMapping("/budgetChart")
 	public ResponseEntity<BudgetChart> getBudgetsChart() {
 		return ResponseEntity.ok(dashboardService.getBudgetChart());
 	}

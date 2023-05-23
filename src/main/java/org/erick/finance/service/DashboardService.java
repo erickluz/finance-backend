@@ -33,39 +33,40 @@ public class DashboardService {
 	private SpendingRepository spendingRepository;
 	@Autowired
 	private SpendingService spendingService;
-	
-	private static final BigDecimal GOAL_MONEY = new BigDecimal(4000.00);
+	@Autowired
+	private BudgetService budgetService;
 	
 	public Stats getStats() {
+		BigDecimal budgetValue = budgetService.getBudgetByDate(LocalDateTime.now());
 		BigDecimal monthRevenue = revenueRepository.getTotalRevenueByMonth();
 		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode());
 		BigDecimal monthBalance = monthRevenue.subtract(monthSpending);
-		BigDecimal monthBudgetMoney = monthRevenue.subtract(GOAL_MONEY);
+		BigDecimal monthBudgetMoney = monthRevenue.subtract(budgetValue);
 		BigDecimal monthBalanceGoal = monthBudgetMoney.subtract(monthSpending); 
 		BigDecimal monthBudgetPercentage = monthSpending.multiply(new BigDecimal(100)).divide(monthBudgetMoney, 2, RoundingMode.HALF_DOWN);
+		LocalDateTime lastDateOfMonth = getLastDayOfMonth();
+		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(lastDateOfMonth);
+		BigDecimal totalSpeding = spendingRepository.getTotalSpending(lastDateOfMonth, TypeSpending.GROUPING.getCode());
+		BigDecimal totalBalance = totalRevenue.subtract(totalSpeding);
+		BigDecimal totalBudgetValue = budgetService.getTotalBudgetValue();
+		BigDecimal totalBudgetBalance = getTotalBudgetBalance(totalBudgetValue);
+		return new Stats(monthRevenue.toString(), monthSpending.toString(), monthBalance.toString(), monthBalanceGoal.toString(), 
+				monthBudgetMoney.toString(), budgetValue.toString(), monthBudgetPercentage.toString(), totalRevenue.toString(), totalSpeding.toString(),
+				totalBudgetValue.toString(),totalBudgetBalance.toString(), totalBalance.toString());
+	}
+
+	private LocalDateTime getLastDayOfMonth() {
 		int lastDay = LocalDate.now().withDayOfMonth(LocalDate.now().getMonth().length(LocalDate.now().isLeapYear())).getDayOfMonth();
 		LocalDateTime finalDate = LocalDateTime.now().withDayOfMonth(lastDay);
-		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(finalDate);
-		BigDecimal totalSpeding = spendingRepository.getTotalSpending(finalDate, TypeSpending.GROUPING.getCode());
-		BigDecimal totalBalance = totalRevenue.subtract(totalSpeding);
-		Integer countSpendingMonths = spendingRepository.getCountMonths();
-		BigDecimal totalGoalMoney = getTotalGoalMoney(countSpendingMonths);
-		BigDecimal totalBudgetBalance = getTotalBudgetBalance(countSpendingMonths);
-		return new Stats(monthRevenue.toString(), monthSpending.toString(), monthBalance.toString(), monthBalanceGoal.toString(), 
-				monthBudgetMoney.toString(), GOAL_MONEY.toString(), monthBudgetPercentage.toString(), totalRevenue.toString(), totalSpeding.toString(),
-				totalGoalMoney.toString(),totalBudgetBalance.toString(), totalBalance.toString());
+		return finalDate;
 	}
 
-	private BigDecimal getTotalGoalMoney(Integer countSpendingMonths) {
-		return GOAL_MONEY.multiply(new BigDecimal(countSpendingMonths));
-	}
-
-	private BigDecimal getTotalBudgetBalance(Integer countSpendingMonths) {
+	private BigDecimal getTotalBudgetBalance(BigDecimal totalBudgetValue) {
 		LocalDate lDate = LocalDate.now();
 		LocalDateTime date = LocalDateTime.now().withDayOfMonth(LocalDateTime.now().getMonth().length(lDate.isLeapYear()));
 		BigDecimal totalSpending = spendingRepository.getTotalSpending(date, TypeSpending.GROUPING.getCode());
 		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(date);
-		totalRevenue = totalRevenue.subtract(GOAL_MONEY.multiply(BigDecimal.valueOf(countSpendingMonths.doubleValue())));
+		totalRevenue = totalRevenue.subtract(totalBudgetValue);
 		return totalRevenue.subtract(totalSpending);
 	}
 	
@@ -78,8 +79,10 @@ public class DashboardService {
 				.collect(Collectors.toList());
 		List<BigDecimal> budgets = revenueRepository.getTotalRevenuePerMonth(initialDate, finalDate)
 				.stream()
-				.map(s -> s.subtract(GOAL_MONEY).setScale(2, RoundingMode.HALF_DOWN))
-				.collect(Collectors.toList());
+				.map(s -> {
+					BigDecimal budgetValue = budgetService.getBudgetByDate(s.getDate());
+					return s.getValue().subtract(budgetValue).setScale(2, RoundingMode.HALF_DOWN);
+				}).collect(Collectors.toList());
 		List<BigDecimal> percentBudget = getPercentBudgetByMonth(spendings, budgets);
 		List<String> dates = spendingService.getListDatesSpending();
 		return new BudgetChart(spendings, budgets, percentBudget, dates);
