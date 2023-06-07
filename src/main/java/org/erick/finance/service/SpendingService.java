@@ -50,7 +50,7 @@ public class SpendingService {
 		Card card = getCardSpending(spendingDTO);
 		Spending spending = new Spending(parseId(spendingDTO), spendingDTO.getName(), date, value, spendingCategory, getType(spendingDTO), 
 				null, null, card);
-		spending.setSpendingsInsallments(getParts(spendingDTO, spending));
+		spending.setSpendingsInsallments(getParts(spendingDTO, spending, card));
 		return rep.save(spending);
 	}
 
@@ -66,15 +66,15 @@ public class SpendingService {
 		return (spendingDTO.getId() != null && !spendingDTO.getId().equals("")) ? Long.valueOf(spendingDTO.getId()) : null;
 	}
 	
-	private List<Spending> getParts(SpendingDTO spendingDTO, Spending spending) {
+	private List<Spending> getParts(SpendingDTO spendingDTO, Spending spending, Card card) {
 		List<Spending> partsSpending = new ArrayList<>();
 		if (spendingDTO.getParts() != null && !spendingDTO.getParts().equals("")) {
-			createPartSpendings(spendingDTO, partsSpending, spending);
+			createPartSpendings(spendingDTO, partsSpending, spending, card);
 		}
 		return partsSpending;
 	}
 
-	private void createPartSpendings(SpendingDTO spendingDTO, List<Spending> partsSpending, Spending spending) {
+	private void createPartSpendings(SpendingDTO spendingDTO, List<Spending> partsSpending, Spending spending, Card card) {
 		Integer parts = Integer.valueOf(spendingDTO.getParts());
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]");
 		LocalDateTime date = LocalDateTime.parse(spendingDTO.getDate() + " 00:00:00", dateTimeFormatter);
@@ -82,7 +82,7 @@ public class SpendingService {
 			String name = spendingDTO.getName() + " (" + (i+1) + "/" + parts + ")";				
 			BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
 			SpendingCategory spendingCategory = categoryService.findById(Long.valueOf(spendingDTO.getIdCategory()));
-			Spending spendingPart = new Spending(null, name, date, value, spendingCategory, TypeSpending.PART.getCode(), spending, null, null);
+			Spending spendingPart = new Spending(null, name, date, value, spendingCategory, TypeSpending.PART.getCode(), spending, null, card);
 			date = date.plusMonths(1L);
 			partsSpending.add(spendingPart);
 		}

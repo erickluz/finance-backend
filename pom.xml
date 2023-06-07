@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>org.erick</groupId>
 	<artifactId>finance</artifactId>
-	<version>1.5</version>
+	<version>1.6</version>
 	<name>finance</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
