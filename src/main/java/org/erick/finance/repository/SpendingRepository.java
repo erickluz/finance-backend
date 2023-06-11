@@ -92,4 +92,9 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 			+ "ORDER BY s.date ASC ")
 	public List<SpendingDayDTO> getListSpendingPerDay();
 
+	@Query(" SELECT s.spendingsInsallments FROM Spending s "
+			+ "	WHERE s.id = :id "
+			+ "	ORDER BY s.date ASC ")
+	public List<Spending> getFirstPartSpending(Long id);
+
 }

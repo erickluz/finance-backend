@@ -125,15 +125,100 @@ public class SpendingService {
 		if (spending == null) {
 			throw new Exception();
 		}
-		spending.setName(spendingDTO.getName());
+		Spending spendingGrouping = findById(spending.getSpendingGroup().getId());
+		spendingGrouping.setName(spendingDTO.getName());
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]");
 		LocalDateTime date = LocalDateTime.parse(spendingDTO.getDate() + " 00:00:00", dateTimeFormatter);
-		spending.setDate(date);
+		spendingGrouping.setDate(date);
 		BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
-		spending.setValue(value);
+		spendingGrouping.setValue(value);
 		SpendingCategory category = categoryService.findById(Long.valueOf(spendingDTO.getIdCategory()));
-		spending.setCategory(category);
-		rep.save(spending);
+		spendingGrouping.setCategory(category);
+		spendingGrouping.setCard(getCardSpending(spendingDTO));
+		updateInstallments(spendingGrouping);
+		spendingGrouping = rep.save(spendingGrouping);
 	}
 
+	private void updateInstallments(Spending spending) {
+		int installments = spending.getSpendingsInsallments().size();
+		spending.getSpendingsInsallments().clear();
+		LocalDateTime date = spending.getDate();
+		for (int i = 0; i < installments; i++) {
+			String name = spending.getName() + " (" + (i+1) + "/" + installments + ")";				
+			Spending spendingPart = new Spending(null, name, date, spending.getValue(), spending.getCategory(), TypeSpending.PART.getCode(), 
+					spending, null, spending.getCard());
+			date = date.plusMonths(1L);
+			spending.getSpendingsInsallments().add(spendingPart);
+		}
+	}
+
+	public List<Spending> getPartsSpending(Long id) {
+		return rep.getFirstPartSpending(id);
+	}
+	
+	public List<SpendingDTO> listSpendingToDTO(String dateParam) {
+		List<Spending> spendings = listByMonth(dateParam);
+		List<SpendingDTO> spendingsDTO = spendings.stream()
+				.map(spending -> {
+					String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+					String value = "R$ " + spending.getValue();
+					String categoria = spending.getCategory().getName();
+					String card = (spending.getCard() != null) ? spending.getCard().getIssuer() : "Sem Cartão";
+					String idCard = (spending.getCard() != null) ? spending.getCard().getId().toString() : "";	
+					String namePart = getPartName(spending);
+					SpendingDTO spendingDTO = new SpendingDTO(spending.getId().toString(), spending.getName(), namePart, spending.getType(), 
+							date, value, categoria, null, idCard, card, null);
+					setParts(spendingDTO, spending);
+					return spendingDTO;
+				})
+				.collect(Collectors.toList());
+		return spendingsDTO;
+	}
+	
+	public SpendingDTO getSpendingDTO(Spending spending) {
+		String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+		String value = spending.getValue().toString();
+		String categoria = spending.getCategory().getId().toString();
+		String card = (spending.getCard() != null) ? spending.getCard().getId().toString() : null;
+		String parts = getParts(spending);
+		String name = spending.getName();
+		String namePart = getPartName(spending);
+		return new SpendingDTO(spending.getId().toString(), name, namePart, spending.getType(), date, value, categoria, parts, card, null, null);
+	}
+	
+	private void setParts(SpendingDTO spendingDTO, Spending spending) {
+		if (TypeSpending.fromCode(spending.getType()).equals(TypeSpending.PART)) {
+			List<Spending> groupSpendings = getPartsSpending(spending.getSpendingGroup().getId());
+			spendingDTO.setIsFirstPart(isFirstPart(spending, groupSpendings));
+			spendingDTO.setParts(String.valueOf(groupSpendings.size()));
+		}
+	}
+
+	private Boolean isFirstPart(Spending spending, List<Spending> groupSpendings) {
+		if (groupSpendings != null && groupSpendings.size() > 0) {
+			Spending firstPartSpending = groupSpendings.get(0);
+			return firstPartSpending.getId().equals(spending.getId());
+		} else {
+			return false;
+		}
+	}
+
+	private String getPartName(Spending spending) {
+		String partName = null;
+		if (spending.getSpendingGroup() != null) {
+			partName = spending.getSpendingGroup().getName();
+		}
+		return partName;
+	}
+
+	private String getParts(Spending spending) {
+		Integer parts = 0;
+		if (spending.getSpendingGroup() != null) {
+			List<Spending> spendings = getPartsSpending(spending.getSpendingGroup().getId());
+			if (spendings != null) {
+				parts = spendings.size();
+			}
+		}
+		return parts.toString();
+	}
 }

@@ -1,9 +1,7 @@
 package org.erick.finance.resource;
 
 import java.net.URI;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.erick.finance.domain.Spending;
 import org.erick.finance.dto.DateDTO;
@@ -23,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@CrossOrigin
+@CrossOrigin()
 @RequestMapping("/spending")
 @RestController
 public class SpendingResource {
@@ -33,13 +31,13 @@ public class SpendingResource {
 	
 	@GetMapping
 	public ResponseEntity<List<SpendingDTO>> listAll(@RequestParam String date) {
-		List<SpendingDTO> spendings = listSpendingToDTO(date);
+		List<SpendingDTO> spendings = spendingService.listSpendingToDTO(date);
 		return ResponseEntity.ok(spendings);
 	}
 	
 	@GetMapping(value="/{id}")
 	public ResponseEntity<SpendingDTO> buscar(@PathVariable Long id){
-		SpendingDTO spendingDTO = getSpendingDTO(spendingService.findById(id));
+		SpendingDTO spendingDTO = spendingService.getSpendingDTO(spendingService.findById(id));
 		return ResponseEntity.ok(spendingDTO);
 	}
 	
@@ -50,8 +48,8 @@ public class SpendingResource {
 		return ResponseEntity.created(uri).build(); 
 	}
 	
-	@PutMapping(value="/{id}")
-	public ResponseEntity<Void> update(@RequestBody SpendingDTO obj, @PathVariable Long id) throws Exception{
+	@PutMapping
+	public ResponseEntity<Void> update(@RequestBody SpendingDTO obj) throws Exception{
 		spendingService.update(obj);
 		return ResponseEntity.noContent().build();
 	}
@@ -62,32 +60,9 @@ public class SpendingResource {
 		return ResponseEntity.noContent().build();
 	}
 	
-	
 	@GetMapping("/dates")
 	public ResponseEntity<List<DateDTO>> getSpendingDates() {
 		return ResponseEntity.ok(spendingService.getDatesSpending());
 	}
 	
-	private List<SpendingDTO> listSpendingToDTO(String dateParam) {
-		List<SpendingDTO> spendings = spendingService.listByMonth(dateParam).stream()
-				.map(spending -> {
-					String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-					String value = "R$ " + spending.getValue();
-					String categoria = spending.getCategory().getName();
-					String card = (spending.getCard() != null) ? spending.getCard().getIssuer() : "Sem Cartão";
-					String idCard = (spending.getCard() != null) ? spending.getCard().getId().toString() : "";
-					return new SpendingDTO(spending.getId().toString(), spending.getName(), date, value, categoria, null, idCard, card);
-				})
-				.collect(Collectors.toList());
-		return spendings;
-	}
-	
-	
-	private SpendingDTO getSpendingDTO(Spending spending) {
-		String date = spending.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		String value = spending.getValue().toString();
-		String categoria = spending.getCategory().getId().toString();
-		String card = (spending.getCard() != null) ? spending.getCard().getId().toString() : null;
-		return new SpendingDTO(spending.getId().toString(), spending.getName(), date, value, categoria, null, card, null);
-	}
 }
