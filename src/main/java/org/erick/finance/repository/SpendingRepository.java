@@ -17,7 +17,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	@Query("SELECT coalesce(SUM(coalesce(s.value, 0.0)), 0.0) "
 			+ "		FROM Spending s "
 			+ "		LEFT JOIN s.card c "
-			+ "		WHERE MONTH(s.date) = MONTH(current_date)"
+			+ "		WHERE MONTH(s.date) = MONTH(current_date) AND YEAR(s.date) = YEAR(current_date) "
 			+ "		AND s.type <> :groupingType "
 			+ "		AND ((c.id IS NOT NULL AND c.isBudget = TRUE) OR (c.id IS NULL)) ")
 	public BigDecimal getTotalSpendingByMonth(Short groupingType);
@@ -62,7 +62,7 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	@Query("SELECT new org.erick.finance.dto.ItemCategoryDTO(SUM(s.value), c.name) "
 			+ "FROM Spending s "
 			+ "INNER JOIN s.category c "
-			+ "WHERE MONTH(s.date) = MONTH(current_date) "
+			+ "WHERE MONTH(s.date) = MONTH(current_date) AND YEAR(s.date) = YEAR(current_date) "
 			+ "	AND s.type <> :groupingType "
 			+ "GROUP BY c.name ")
 	public List<ItemCategoryDTO> getListSpendingCategory(Short groupingType);
