@@ -28,8 +28,10 @@ public class DashboardResource {
 	
 	@CrossOrigin
 	@GetMapping("/budgetChart")
-	public ResponseEntity<BudgetChart> getBudgetsChart() {
-		return ResponseEntity.ok(dashboardService.getBudgetChart());
+	public ResponseEntity<BudgetChart> getBudgetsChart(
+			@RequestParam(required = false) String initialDate, 
+			@RequestParam(required = false) String finalDate) {
+		return ResponseEntity.ok(dashboardService.getBudgetChart(initialDate, finalDate));
 	}
 	
 	@CrossOrigin

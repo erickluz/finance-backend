@@ -113,8 +113,8 @@ public class SpendingService {
 		return utilService.getListDatesBetweenTwoDates(initialDate, finalDate);
 	}
 	
-	public List<String> getListDatesSpending() {
-		List<Integer> dates = rep.getListSpending(TypeSpending.GROUPING.getCode());
+	public List<String> getListDatesSpending(LocalDateTime initialDate, LocalDateTime finalDate) {
+		List<Integer> dates = rep.getListSpending(TypeSpending.GROUPING.getCode(), initialDate, finalDate);
 		return dates.stream().map(date -> {
 			return Month.fromNumber(date).getShortName();
 		}).collect(Collectors.toList());

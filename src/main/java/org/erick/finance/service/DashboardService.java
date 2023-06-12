@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -70,9 +71,9 @@ public class DashboardService {
 		return totalRevenue.subtract(totalSpending);
 	}
 	
-	public BudgetChart getBudgetChart() {
-		LocalDateTime initialDate = spendingRepository.findTopByOrderByDateAsc().getDate();
-		LocalDateTime finalDate = spendingRepository.findTopByOrderByDateDesc().getDate();
+	public BudgetChart getBudgetChart(String sInitialDate, String sFinalDate) {
+		LocalDateTime initialDate = getInitialDate(sInitialDate);
+		LocalDateTime finalDate = getFinalDate(sFinalDate);
 		List<BigDecimal> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate, TypeSpending.GROUPING.getCode())
 				.stream()
 				.map(s -> s.setScale(2, RoundingMode.HALF_DOWN))
@@ -84,8 +85,25 @@ public class DashboardService {
 					return s.getValue().subtract(budgetValue).setScale(2, RoundingMode.HALF_DOWN);
 				}).collect(Collectors.toList());
 		List<BigDecimal> percentBudget = getPercentBudgetByMonth(spendings, budgets);
-		List<String> dates = spendingService.getListDatesSpending();
+		List<String> dates = spendingService.getListDatesSpending(initialDate, finalDate);
 		return new BudgetChart(spendings, budgets, percentBudget, dates);
+	}
+
+	private LocalDateTime getFinalDate(String sFinalDate) {
+		int lastDay = LocalDate.now().withDayOfMonth(1).plus(6, ChronoUnit.MONTHS).withDayOfMonth(LocalDate.now().getMonth().length(LocalDate.now().isLeapYear())).getDayOfMonth();
+		if (sFinalDate != null) {
+			return LocalDateTime.parse(sFinalDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")).withDayOfMonth(lastDay);
+		} else {			
+			return LocalDateTime.now().withDayOfMonth(1).plus(6, ChronoUnit.MONTHS).withDayOfMonth(lastDay);
+		}
+	}
+
+	private LocalDateTime getInitialDate(String sInitialDate) {
+		if (sInitialDate != null) {
+			return LocalDateTime.parse(sInitialDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")).withDayOfMonth(1);
+		} else {
+			return LocalDateTime.now().withDayOfMonth(1).minus(5, ChronoUnit.MONTHS);
+		}
 	}
 	
 	private List<BigDecimal> getPercentBudgetByMonth(List<BigDecimal> spendings, List<BigDecimal> budgets) {
@@ -163,5 +181,6 @@ public class DashboardService {
 	    calendar.setTime(date2);
 	    return calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, new Locale("PT-BR")) + "-";
 	}
+
 
 }

@@ -53,10 +53,11 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	
 	@Query("SELECT DISTINCT MONTH(s.date), YEAR(s.date) "
 			+ "FROM Spending s "
-			+ "	WHERE s.type <> :groupingType "
+			+ " WHERE s.date BETWEEN :initialDate AND :finalDate "
+			+ "	AND s.type <> :groupingType "
 			+ "GROUP BY MONTH(s.date), YEAR(s.date) "
 			+ "ORDER BY YEAR(s.date), MONTH(s.date) ")
-	public List<Integer> getListSpending(Short groupingType);
+	public List<Integer> getListSpending(Short groupingType, LocalDateTime initialDate, LocalDateTime finalDate);
 	
 	@Query("SELECT new org.erick.finance.dto.ItemCategoryDTO(SUM(s.value), c.name) "
 			+ "FROM Spending s "
