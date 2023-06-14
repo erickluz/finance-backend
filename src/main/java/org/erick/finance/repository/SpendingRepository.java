@@ -17,18 +17,18 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	@Query("SELECT coalesce(SUM(coalesce(s.value, 0.0)), 0.0) "
 			+ "		FROM Spending s "
 			+ "		LEFT JOIN s.card c "
-			+ "		WHERE MONTH(s.date) = MONTH(current_date) AND YEAR(s.date) = YEAR(current_date) "
+			+ "		WHERE MONTH(s.date) = MONTH(DATE(:date)) AND YEAR(s.date) = YEAR(DATE(:date)) "
 			+ "		AND s.type <> :groupingType "
 			+ "		AND ((c.id IS NOT NULL AND c.isBudget = TRUE) OR (c.id IS NULL)) ")
-	public BigDecimal getTotalSpendingByMonth(Short groupingType);
+	public BigDecimal getTotalSpendingByMonth(Short groupingType, LocalDateTime date);
 	
 	@Query("SELECT coalesce(SUM(s.value), 0.0) "
 			+ "		FROM  Spending s "
 			+ "		LEFT JOIN s.card c "
-			+ "		WHERE s.date <= :date "
+			+ "		WHERE s.date BETWEEN :initialDate AND :finalDate "
 			+ "		AND s.type <> :groupingType "
 			+ "		AND ((c.id IS NOT NULL AND c.isBudget = TRUE) OR (c.id IS NULL)) ")
-	public BigDecimal getTotalSpending(LocalDateTime date, Short groupingType);
+	public BigDecimal getTotalSpending(LocalDateTime initialDate, LocalDateTime finalDate, Short groupingType);
 
 	public Spending findTopByOrderByDateAsc();
 	public Spending findTopByOrderByDateDesc();

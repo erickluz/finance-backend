@@ -15,7 +15,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.erick.finance.domain.BudgetChart;
-import org.erick.finance.domain.Stats;
+import org.erick.finance.domain.MonthStats;
+import org.erick.finance.domain.TotalsStats;
 import org.erick.finance.domain.TypeSpending;
 import org.erick.finance.dto.ChartSpendingDayDTO;
 import org.erick.finance.dto.SpendingCategoryDTO;
@@ -37,36 +38,42 @@ public class DashboardService {
 	@Autowired
 	private BudgetService budgetService;
 	
-	public Stats getStats() {
-		BigDecimal budgetValue = budgetService.getBudgetByDate(LocalDateTime.now());
-		BigDecimal monthRevenue = revenueRepository.getTotalRevenueByMonth();
-		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode());
+	public MonthStats getMonthStats(String month) {
+		LocalDateTime monthStatsDate = getMonthStatsDate(month);
+		BigDecimal budgetValue = budgetService.getBudgetByDate(monthStatsDate);
+		BigDecimal monthRevenue = revenueRepository.getTotalRevenueByMonth(monthStatsDate);
+		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode(), monthStatsDate);
 		BigDecimal monthBalance = monthRevenue.subtract(monthSpending);
 		BigDecimal monthBudgetMoney = monthRevenue.subtract(budgetValue);
 		BigDecimal monthBalanceGoal = monthBudgetMoney.subtract(monthSpending); 
 		BigDecimal monthBudgetPercentage = monthSpending.multiply(new BigDecimal(100)).divide(monthBudgetMoney, 2, RoundingMode.HALF_DOWN);
-		LocalDateTime lastDateOfMonth = getLastDayOfMonth();
-		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(lastDateOfMonth);
-		BigDecimal totalSpeding = spendingRepository.getTotalSpending(lastDateOfMonth, TypeSpending.GROUPING.getCode());
+		return new MonthStats(monthRevenue.toString(), monthSpending.toString(), monthBalance.toString(), monthBalanceGoal.toString(), monthBudgetMoney.toString(), budgetValue.toString(), monthBudgetPercentage.toString());
+	}
+	
+	private LocalDateTime getMonthStatsDate(String month) {
+		if (month != null) {
+			return LocalDateTime.parse(month + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")).withDayOfMonth(1); 
+		} else {
+			return LocalDateTime.now();
+		}
+	}
+
+	public TotalsStats getTotalsStats(String sInitialDate, String sFinalDate) {
+		LocalDateTime initialDate = LocalDateTime.parse(sInitialDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")).withDayOfMonth(1);
+		LocalDateTime finalDate = LocalDateTime.parse(sFinalDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+		int lastDay = finalDate.toLocalDate().withDayOfMonth(finalDate.toLocalDate().getMonth().length(finalDate.toLocalDate().isLeapYear())).getDayOfMonth();
+		finalDate = finalDate.withDayOfMonth(lastDay);
+		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(initialDate, finalDate);
+		BigDecimal totalSpeding = spendingRepository.getTotalSpending(initialDate, finalDate, TypeSpending.GROUPING.getCode());
 		BigDecimal totalBalance = totalRevenue.subtract(totalSpeding);
-		BigDecimal totalBudgetValue = budgetService.getTotalBudgetValue();
-		BigDecimal totalBudgetBalance = getTotalBudgetBalance(totalBudgetValue);
-		return new Stats(monthRevenue.toString(), monthSpending.toString(), monthBalance.toString(), monthBalanceGoal.toString(), 
-				monthBudgetMoney.toString(), budgetValue.toString(), monthBudgetPercentage.toString(), totalRevenue.toString(), totalSpeding.toString(),
-				totalBudgetValue.toString(),totalBudgetBalance.toString(), totalBalance.toString());
+		BigDecimal totalBudgetValue = budgetService.getTotalBudgetValue(initialDate, finalDate);
+		BigDecimal totalBudgetBalance = getTotalBudgetBalance(totalBudgetValue, initialDate, finalDate);
+		return new TotalsStats(totalRevenue.toString(), totalSpeding.toString(), totalBudgetValue.toString(), totalBudgetBalance.toString(), totalBalance.toString());
 	}
 
-	private LocalDateTime getLastDayOfMonth() {
-		int lastDay = LocalDate.now().withDayOfMonth(LocalDate.now().getMonth().length(LocalDate.now().isLeapYear())).getDayOfMonth();
-		LocalDateTime finalDate = LocalDateTime.now().withDayOfMonth(lastDay);
-		return finalDate;
-	}
-
-	private BigDecimal getTotalBudgetBalance(BigDecimal totalBudgetValue) {
-		LocalDate lDate = LocalDate.now();
-		LocalDateTime date = LocalDateTime.now().withDayOfMonth(LocalDateTime.now().getMonth().length(lDate.isLeapYear()));
-		BigDecimal totalSpending = spendingRepository.getTotalSpending(date, TypeSpending.GROUPING.getCode());
-		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(date);
+	private BigDecimal getTotalBudgetBalance(BigDecimal totalBudgetValue, LocalDateTime initialDate, LocalDateTime finalDate) {
+		BigDecimal totalSpending = spendingRepository.getTotalSpending(initialDate, finalDate, TypeSpending.GROUPING.getCode());
+		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(initialDate, finalDate);
 		totalRevenue = totalRevenue.subtract(totalBudgetValue);
 		return totalRevenue.subtract(totalSpending);
 	}

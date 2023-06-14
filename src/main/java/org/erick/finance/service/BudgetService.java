@@ -21,8 +21,8 @@ public class BudgetService {
 		return budgetRepository.getBudgetByDate(date);
 	}
 
-	public BigDecimal getTotalBudgetValue() {
-		return budgetRepository.getTotalBudgetValue();
+	public BigDecimal getTotalBudgetValue(LocalDateTime initialDate, LocalDateTime finalDate) {
+		return budgetRepository.getTotalBudgetValue(initialDate, finalDate);
 	}
 	
 	public Budget save(BudgetDTO budget) {

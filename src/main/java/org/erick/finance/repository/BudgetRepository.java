@@ -17,7 +17,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Long>{
 	BigDecimal getBudgetByDate(LocalDateTime date);
 
 	@Query("SELECT SUM(b.value) FROM Budget b "
-	       + "	WHERE b.date <= current_date ")
-	BigDecimal getTotalBudgetValue();
+	       + "	WHERE b.date BETWEEN :initialDate AND :finalDate ")
+	BigDecimal getTotalBudgetValue(LocalDateTime initialDate, LocalDateTime finalDate);
 
 }

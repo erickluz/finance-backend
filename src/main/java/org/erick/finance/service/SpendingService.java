@@ -125,30 +125,34 @@ public class SpendingService {
 		if (spending == null) {
 			throw new Exception();
 		}
-		Spending spendingGrouping = findById(spending.getSpendingGroup().getId());
-		spendingGrouping.setName(spendingDTO.getName());
+		if (spending.getSpendingGroup() != null) {
+			spending = findById(spending.getSpendingGroup().getId());
+		}
+		spending.setName(spendingDTO.getName());
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]");
 		LocalDateTime date = LocalDateTime.parse(spendingDTO.getDate() + " 00:00:00", dateTimeFormatter);
-		spendingGrouping.setDate(date);
+		spending.setDate(date);
 		BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
-		spendingGrouping.setValue(value);
+		spending.setValue(value);
 		SpendingCategory category = categoryService.findById(Long.valueOf(spendingDTO.getIdCategory()));
-		spendingGrouping.setCategory(category);
-		spendingGrouping.setCard(getCardSpending(spendingDTO));
-		updateInstallments(spendingGrouping);
-		spendingGrouping = rep.save(spendingGrouping);
+		spending.setCategory(category);
+		spending.setCard(getCardSpending(spendingDTO));
+		updateInstallments(spending, spendingDTO);
+		rep.save(spending);
 	}
 
-	private void updateInstallments(Spending spending) {
-		int installments = spending.getSpendingsInsallments().size();
-		spending.getSpendingsInsallments().clear();
-		LocalDateTime date = spending.getDate();
-		for (int i = 0; i < installments; i++) {
-			String name = spending.getName() + " (" + (i+1) + "/" + installments + ")";				
-			Spending spendingPart = new Spending(null, name, date, spending.getValue(), spending.getCategory(), TypeSpending.PART.getCode(), 
-					spending, null, spending.getCard());
-			date = date.plusMonths(1L);
-			spending.getSpendingsInsallments().add(spendingPart);
+	private void updateInstallments(Spending spending, SpendingDTO spendingDTO) {
+		Integer installments = Integer.valueOf(spendingDTO.getParts());
+		if (installments > 0) {
+			spending.getSpendingsInsallments().clear();
+			LocalDateTime date = spending.getDate();
+			for (int i = 0; i < installments; i++) {
+				String name = spending.getName() + " (" + (i+1) + "/" + installments + ")";				
+				Spending spendingPart = new Spending(null, name, date, spending.getValue(), spending.getCategory(), TypeSpending.PART.getCode(), 
+						spending, null, spending.getCard());
+				date = date.plusMonths(1L);
+				spending.getSpendingsInsallments().add(spendingPart);
+			}
 		}
 	}
 

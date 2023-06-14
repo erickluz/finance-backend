@@ -13,8 +13,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RevenueRepository extends JpaRepository<Revenue, Long>{
 
-	@Query("SELECT SUM(coalesce(r.value, 0.0)) FROM Revenue r WHERE MONTH(r.date) = MONTH(current_date)")
-	BigDecimal getTotalRevenueByMonth();
+	@Query("SELECT SUM(coalesce(r.value, 0.0)) FROM Revenue r "
+			+ "	WHERE MONTH(r.date) = MONTH(DATE(:date)) "
+			+ "	AND YEAR(r.date) = YEAR(DATE(:date))")
+	BigDecimal getTotalRevenueByMonth(LocalDateTime date);
 
 	@Query("SELECT new org.erick.finance.dto.RevenuePerMonthDTO(SUM(r.value), MONTH(r.date), YEAR(r.date), r.date) "
 			+ " FROM Revenue r "
@@ -26,7 +28,7 @@ public interface RevenueRepository extends JpaRepository<Revenue, Long>{
 	@Query("SELECT "
 			+ " SUM(r.value) "
 			+ " FROM Revenue r "
-			+ " WHERE r.date <= :date")
-	BigDecimal getTotalRevenue(LocalDateTime date);
+			+ " WHERE r.date BETWEEN :initialDate AND :finalDate ")
+	BigDecimal getTotalRevenue(LocalDateTime initialDate, LocalDateTime finalDate);
 	
 }

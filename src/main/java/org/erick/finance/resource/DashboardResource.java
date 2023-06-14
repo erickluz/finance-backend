@@ -1,7 +1,8 @@
 package org.erick.finance.resource;
 
 import org.erick.finance.domain.BudgetChart;
-import org.erick.finance.domain.Stats;
+import org.erick.finance.domain.MonthStats;
+import org.erick.finance.domain.TotalsStats;
 import org.erick.finance.dto.ChartSpendingDayDTO;
 import org.erick.finance.dto.SpendingCategoryDTO;
 import org.erick.finance.service.DashboardService;
@@ -21,9 +22,15 @@ public class DashboardResource {
 	private DashboardService dashboardService;
 	
 	@CrossOrigin
-	@GetMapping
-	public ResponseEntity<Stats> getStats() {
-		return ResponseEntity.ok(dashboardService.getStats());
+	@GetMapping("/totalsStats")
+	public ResponseEntity<TotalsStats> getTotalStats(String initialDate, String finalDate) {
+		return ResponseEntity.ok(dashboardService.getTotalsStats(initialDate, finalDate));
+	}
+	
+	@CrossOrigin
+	@GetMapping("/monthStats")
+	public ResponseEntity<MonthStats> getMonthStats(@RequestParam(required = false) String date) {
+		return ResponseEntity.ok(dashboardService.getMonthStats(date));
 	}
 	
 	@CrossOrigin
