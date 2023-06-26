@@ -36,10 +36,10 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	@Query("SELECT s "
 			+ " FROM Spending s "
 			+ "	LEFT JOIN FETCH s.card c "
-			+ " WHERE MONTH(s.date) = :month "
+			+ " WHERE MONTH(s.date) = :month AND YEAR(s.date) = :year "
 			+ "	AND s.type <> :groupingType "
 			+ "	ORDER BY s.id")
-	public List<Spending> listByMonth(int month, Short groupingType);
+	public List<Spending> listByMonth(int month, int year,Short groupingType);
 
 	@Query("SELECT SUM(s.value), MONTH(s.date), YEAR(s.date) "
 			+ " FROM Spending s "

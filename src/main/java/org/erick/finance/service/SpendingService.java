@@ -35,7 +35,7 @@ public class SpendingService {
 	
 	public List<Spending> listByMonth(String date) {
 		LocalDateTime datetime = LocalDateTime.parse(date+ " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
-		return rep.listByMonth(datetime.getMonthValue(), TypeSpending.GROUPING.getCode());
+		return rep.listByMonth(datetime.getMonthValue(), datetime.getYear(), TypeSpending.GROUPING.getCode());
 	}
 	
 	public Spending save(Spending spending) {
