@@ -97,7 +97,8 @@ public class DashboardService {
 	}
 
 	private LocalDateTime getFinalDate(String sFinalDate) {
-		int lastDay = LocalDate.now().withDayOfMonth(1).plus(6, ChronoUnit.MONTHS).withDayOfMonth(LocalDate.now().getMonth().length(LocalDate.now().isLeapYear())).getDayOfMonth();
+		LocalDate sixMonthsAhead = LocalDate.now().withDayOfMonth(1).plus(6, ChronoUnit.MONTHS); 
+		int lastDay = sixMonthsAhead.withDayOfMonth(sixMonthsAhead.getMonth().length(sixMonthsAhead.isLeapYear())).getDayOfMonth();
 		if (sFinalDate != null) {
 			return LocalDateTime.parse(sFinalDate + " 00:00:00",DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")).withDayOfMonth(lastDay);
 		} else {			
