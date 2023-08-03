@@ -14,7 +14,12 @@ public interface BudgetRepository extends JpaRepository<Budget, Long>{
 	@Query(value = "  SELECT b.value FROM Budget b "
 			+ "		WHERE MONTH(b.date) = MONTH(DATE(?1)) "
 			+ "		AND YEAR(b.date) = YEAR(DATE(?1)) ")
-	BigDecimal getBudgetByDate(LocalDateTime date);
+	BigDecimal getBudgetValueByDate(LocalDateTime date);
+	
+	@Query(value = "  SELECT b FROM Budget b "
+			+ "		WHERE MONTH(b.date) = MONTH(DATE(?1)) "
+			+ "		AND YEAR(b.date) = YEAR(DATE(?1)) ")
+	Budget getBudgetByDate(LocalDateTime date);
 
 	@Query("SELECT SUM(b.value) FROM Budget b "
 	       + "	WHERE b.date BETWEEN :initialDate AND :finalDate ")

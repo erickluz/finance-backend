@@ -14,11 +14,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import org.erick.finance.domain.Budget;
 import org.erick.finance.domain.BudgetChart;
 import org.erick.finance.domain.MonthStats;
 import org.erick.finance.domain.TotalsStats;
 import org.erick.finance.domain.TypeSpending;
 import org.erick.finance.dto.ChartSpendingDayDTO;
+import org.erick.finance.dto.RevenuePerMonthDTO;
 import org.erick.finance.dto.SpendingCategoryDTO;
 import org.erick.finance.dto.SpendingDayDTO;
 import org.erick.finance.repository.RevenueRepository;
@@ -40,7 +42,7 @@ public class DashboardService {
 	
 	public MonthStats getMonthStats(String month) {
 		LocalDateTime monthStatsDate = getMonthStatsDate(month);
-		BigDecimal budgetValue = budgetService.getBudgetByDate(monthStatsDate);
+		BigDecimal budgetValue = budgetService.getBudgetValueByDate(monthStatsDate);
 		BigDecimal monthRevenue = revenueRepository.getTotalRevenueByMonth(monthStatsDate);
 		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode(), monthStatsDate);
 		BigDecimal monthBalance = monthRevenue.subtract(monthSpending);
@@ -88,12 +90,23 @@ public class DashboardService {
 		List<BigDecimal> budgets = revenueRepository.getTotalRevenuePerMonth(initialDate, finalDate)
 				.stream()
 				.map(s -> {
-					BigDecimal budgetValue = budgetService.getBudgetByDate(s.getDate());
+					BigDecimal budgetValue = getBudgetByMonthAndYear(s);
 					return s.getValue().subtract(budgetValue).setScale(2, RoundingMode.HALF_DOWN);
 				}).collect(Collectors.toList());
 		List<BigDecimal> percentBudget = getPercentBudgetByMonth(spendings, budgets);
 		List<String> dates = spendingService.getListDatesSpending(initialDate, finalDate);
 		return new BudgetChart(spendings, budgets, percentBudget, dates);
+	}
+
+	private BigDecimal getBudgetByMonthAndYear(RevenuePerMonthDTO s) {
+		Budget budget = budgetService.getBudgetByDate(s.getDate());
+		if (budget == null) {
+			LocalDateTime previousMonth = s.getDate().minusMonths(1L);
+			budget = budgetService.getBudgetByDate(previousMonth);
+			Budget newBudget = new Budget(null, s.getDate(), budget.getValue());
+			budget = budgetService.save(newBudget);
+		}
+		return budget.getValue();
 	}
 
 	private LocalDateTime getFinalDate(String sFinalDate) {

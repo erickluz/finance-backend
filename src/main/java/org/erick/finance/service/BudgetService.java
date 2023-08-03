@@ -17,7 +17,11 @@ public class BudgetService {
 	@Autowired
 	private BudgetRepository budgetRepository;
 	
-	public BigDecimal getBudgetByDate(LocalDateTime date) {
+	public BigDecimal getBudgetValueByDate(LocalDateTime date) {
+		return budgetRepository.getBudgetValueByDate(date);
+	}
+	
+	public Budget getBudgetByDate(LocalDateTime date) {
 		return budgetRepository.getBudgetByDate(date);
 	}
 
@@ -30,6 +34,10 @@ public class BudgetService {
 		LocalDateTime date = LocalDateTime.parse(budget.getDate() + " 00:00:00", dateTimeFormatter);
 		Budget b = new Budget(budget.getId(), date, budget.getValue());
 		return budgetRepository.save(b);
+	}
+	
+	public Budget save(Budget budget) {
+		return budgetRepository.save(budget);
 	}
 	
 	public List<Budget> findAll() {
