@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RevenueRepository extends JpaRepository<Revenue, Long>{
 
-	@Query("SELECT SUM(coalesce(r.value, 0.0)) FROM Revenue r "
+	@Query("SELECT coalesce(SUM(coalesce(r.value, 0.0)), 0.0) FROM Revenue r "
 			+ "	WHERE MONTH(r.date) = MONTH(DATE(:date)) "
 			+ "	AND YEAR(r.date) = YEAR(DATE(:date))")
 	BigDecimal getTotalRevenueByMonth(LocalDateTime date);
