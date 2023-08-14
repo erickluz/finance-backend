@@ -13,4 +13,5 @@ public class TotalsStats {
 	private String totalGoalMoney;
 	private String totalBudgetBalance;
 	private String totalBalance;
+	private String totalDebt;
 }

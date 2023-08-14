@@ -225,4 +225,8 @@ public class SpendingService {
 		}
 		return parts.toString();
 	}
+
+	public BigDecimal getTotalDebt(LocalDateTime initialDate, LocalDateTime finalDate) {
+		return rep.getTotalDebt(initialDate, finalDate);
+	}
 }

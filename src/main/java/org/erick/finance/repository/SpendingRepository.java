@@ -98,4 +98,10 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 			+ "	ORDER BY s.date ASC ")
 	public List<Spending> getFirstPartSpending(Long id);
 
+	@Query("	SELECT coalesce(SUM(s.value), 0.0) "
+			+ " FROM Spending s "
+			+ " WHERE s.date BETWEEN :initialDate AND :finalDate "
+			+ " AND s.type = 3 ")
+	public BigDecimal getTotalDebt(LocalDateTime initialDate, LocalDateTime finalDate);
+
 }

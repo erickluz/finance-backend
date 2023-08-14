@@ -41,7 +41,7 @@ public class DashboardService {
 	private BudgetService budgetService;
 	
 	public MonthStats getMonthStats(String month) {
-		LocalDateTime monthStatsDate = getMonthStatsDate(month);
+		LocalDateTime monthStatsDate =	 getMonthStatsDate(month);
 		BigDecimal budgetValue = budgetService.getBudgetValueByDate(monthStatsDate);
 		BigDecimal monthRevenue = revenueRepository.getTotalRevenueByMonth(monthStatsDate);
 		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode(), monthStatsDate);
@@ -70,7 +70,8 @@ public class DashboardService {
 		BigDecimal totalBalance = totalRevenue.subtract(totalSpeding);
 		BigDecimal totalBudgetValue = budgetService.getTotalBudgetValue(initialDate, finalDate);
 		BigDecimal totalBudgetBalance = getTotalBudgetBalance(totalBudgetValue, initialDate, finalDate);
-		return new TotalsStats(totalRevenue.toString(), totalSpeding.toString(), totalBudgetValue.toString(), totalBudgetBalance.toString(), totalBalance.toString());
+		BigDecimal totalDebt = spendingRepository.getTotalDebt(initialDate, finalDate);
+		return new TotalsStats(totalRevenue.toString(), totalSpeding.toString(), totalBudgetValue.toString(), totalBudgetBalance.toString(), totalBalance.toString(), totalDebt.toString());
 	}
 
 	private BigDecimal getTotalBudgetBalance(BigDecimal totalBudgetValue, LocalDateTime initialDate, LocalDateTime finalDate) {
