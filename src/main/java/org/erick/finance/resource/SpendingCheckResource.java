@@ -37,7 +37,6 @@ public class SpendingCheckResource {
 		    while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
 		        buffer.write(data, 0, nRead);
 		    }
-	
 		    buffer.flush();
 		    byte[] byteArray = buffer.toByteArray();
 		        

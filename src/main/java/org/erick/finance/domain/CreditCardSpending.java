@@ -1,5 +1,6 @@
 package org.erick.finance.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
@@ -22,6 +23,7 @@ public class CreditCardSpending {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String description;
+	private BigDecimal value;
 	private LocalDateTime date;
 	private String part;
 	@JoinColumn(name = "idCreditCardBill")
