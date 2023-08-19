@@ -8,12 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CreditCardBillRepository extends JpaRepository<CreditCardBill, Long>{
+public interface CreditCardBillRepository extends JpaRepository<CreditCardBill, Long>, CustomCreditCardBillRepository{
 
 	@Query("SELECT c FROM CreditCardBill c "
 			+ "	WHERE c.dueDate = :dueDate "
 			+ "	AND c.card.id = :idCard ")
 	CreditCardBill findByDueDateAndCreditCard(LocalDateTime dueDate, Long idCard);
-
 
 }

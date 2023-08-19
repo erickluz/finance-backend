@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.erick.finance.domain.Card;
 import org.erick.finance.domain.CreditCardBill;
+import org.erick.finance.domain.CreditCardSpending;
 import org.erick.finance.dto.CreditCardBillDTO;
 import org.erick.finance.repository.CardRepository;
 import org.erick.finance.repository.CreditCardBillRepository;
@@ -35,7 +36,7 @@ public class CreditCardBillService {
 		}
 		Card card = cardRepository.findById(Long.valueOf(creditCardBillDTO.getIdCard())).orElse(null);
 		LocalDateTime date = LocalDateTime.parse(creditCardBillDTO.getDueDate() + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
-		creditCardBill = new CreditCardBill(null, date, LocalDateTime.now(), card);
+		creditCardBill = new CreditCardBill(null, date, LocalDateTime.now(), card, null);
 		return save(creditCardBill);
 	}
 	
@@ -51,6 +52,10 @@ public class CreditCardBillService {
 
 	public CreditCardBill findById(Long id) {
 		return rep.findById(id).orElse(null);
+	}
+
+	public List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate) {
+		return rep.getCreditCardSpendingByDueDateBill(creditCardSpendingDate);
 	}
 	
 }

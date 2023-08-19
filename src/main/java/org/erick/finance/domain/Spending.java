@@ -45,11 +45,14 @@ public class Spending {
 	@ManyToOne
 	private Spending spendingGroup;
 	@JsonIgnore
-	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Spending> spendingsInsallments = new ArrayList<>();
 	@ManyToOne
 	@JoinColumn(name = "idCard")
-	@Fetch(FetchMode.JOIN)
 	private Card card;
+	@OneToMany(mappedBy = "spending")
+	private List<SpendingCheck> spendingsCheck = new ArrayList<>();
+	@OneToMany(mappedBy = "spending")
+	private List<SpendingCreditCardSpending> spendingsCreditCardSpending = new ArrayList<>();
 	
 }

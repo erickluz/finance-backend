@@ -27,7 +27,7 @@ public class CreditCardFileDTO {
 	public CreditCardSpending toCreditCardSpending() {
 		BigDecimal value = parseRawValue();
 		LocalDateTime date = LocalDateTime.parse(this.date + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
-		return new CreditCardSpending(null, this.description, value, date, this.part, null);
+		return new CreditCardSpending(null, this.description, value, date, this.part, null, null);
 	}
 
 	private BigDecimal parseRawValue() {

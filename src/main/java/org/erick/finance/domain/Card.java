@@ -23,4 +23,5 @@ public class Card {
 	private String brand;
 	private Short type;
 	private Boolean isBudget;
+	private Boolean isChkByFile;
 }

@@ -22,8 +22,8 @@ public class SpendingCheck {
 	@JoinColumn(name = "idSpending")
 	@ManyToOne
 	private Spending spending;
-	@JoinColumn(name = "idSpendingCheck")
+	@JoinColumn(name = "idSpendingCheckMonth")
 	@ManyToOne
-	private SpendingCheck spendingCheck;
+	private SpendingCheckMonth spendingCheckMonth;
 	private String note;
 }
