@@ -1,5 +1,6 @@
 package org.erick.finance.service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -9,17 +10,23 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.erick.finance.domain.CreditCardSpending;
+import org.erick.finance.domain.CreditCardSpendingType;
 import org.erick.finance.domain.Spending;
 import org.erick.finance.domain.SpendingCheck;
 import org.erick.finance.domain.SpendingCheckMonth;
+import org.erick.finance.domain.SpendingCreditCardSpending;
+import org.erick.finance.domain.TypeSpending;
+import org.erick.finance.dto.AssociationsIDSDTO;
 import org.erick.finance.dto.ItemCheckSpendingDTO;
 import org.erick.finance.dto.SpendingCheckAssociationDTO;
 import org.erick.finance.dto.SpendingCheckDTO;
 import org.erick.finance.dto.SpendingCheckMonthDTO;
 import org.erick.finance.repository.SpendingCheckMonthRepository;
 import org.erick.finance.repository.SpendingCheckRepository;
+import org.erick.finance.repository.SpendingCreditCardSpendingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SpendingCheckMonthService {
@@ -32,6 +39,10 @@ public class SpendingCheckMonthService {
 	private SpendingCheckMonthRepository rep;
 	@Autowired
 	private SpendingCheckRepository spendingCheckRep;
+	@Autowired
+	private SpendingCreditCardSpendingRepository spendingCreditCardSpendingRepository;
+	@Autowired
+	private CreditCardSpendingService creditCardSpendingService;
 	
 	public List<SpendingCheckMonth> listAll() {
 		return rep.findAll();
@@ -88,7 +99,6 @@ public class SpendingCheckMonthService {
 		List<CreditCardSpending> creditCardSpendings = creditCardbillService.getCreditCardSpendingByDueDateBill(creditCardSpendingDate);
 		creditCardSpendings.forEach(ccs -> {
 			ItemCheckSpendingDTO spending = new ItemCheckSpendingDTO();
-//			ItemCheckSpendingDTO creditCardSpending = new ItemCheckSpendingDTO();
 			ItemCheckSpendingDTO creditCardSpending = new ItemCheckSpendingDTO(ccs.getId().toString(), ccs.getDescription(), ccs.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 					, ccs.getCreditCardBill().getCard().getIssuer(), ccs.getValue().toString(), ccs.getCreditCardBill().getCard().getIsChkByFile(), false);
 			SpendingCheckAssociationDTO spendingCheckAssociationDTO = new SpendingCheckAssociationDTO(spending, creditCardSpending);
@@ -106,5 +116,56 @@ public class SpendingCheckMonthService {
 	public void removeCheckSpending(Long idSpending) {
 		SpendingCheck spendingCheck = spendingCheckRep.getSpendingCheckBySpendingId(idSpending);
 		spendingCheckRep.deleteById(spendingCheck.getId());
+	}
+
+	@Transactional
+	public void associate(AssociationsIDSDTO associationsIdsDTO) {
+		System.out.println(associationsIdsDTO.toString());
+		validateRegisters(associationsIdsDTO);
+		Spending spendingToAssociate = getSpendingToAssociate(associationsIdsDTO);
+		CreditCardSpending creditCardSpendingToAssociate = getCreditCardSpendingToAssociate(associationsIdsDTO);
+		SpendingCheckMonth spendingCheckMonth = getSpendingCheckMonth(associationsIdsDTO);
+		SpendingCreditCardSpending spendingCreditCardSpending = new SpendingCreditCardSpending(null, creditCardSpendingToAssociate, spendingToAssociate, spendingCheckMonth);
+		spendingCreditCardSpendingRepository.save(spendingCreditCardSpending);
+	}
+
+	private SpendingCheckMonth getSpendingCheckMonth(AssociationsIDSDTO associationsIdsDTO) {
+		return findById(associationsIdsDTO.getIdSpendingCheckMonth());
+	}
+
+	private CreditCardSpending getCreditCardSpendingToAssociate(AssociationsIDSDTO associationsIdsDTO) {
+		if (associationsIdsDTO.getCreditCardIds().size() > 1) {
+			Short type = CreditCardSpendingType.GROUPING.getCode();
+			CreditCardSpending creditCardSpendingGrouping = new CreditCardSpending(null, null, BigDecimal.ZERO, LocalDateTime.now(), null, type, null, null, null, null);
+			for (Long ccs : associationsIdsDTO.getCreditCardIds()) {
+				CreditCardSpending creditCardSpendingChildren = creditCardSpendingService.findById(ccs);
+				creditCardSpendingGrouping.getCreditCardSpendingsChildren().add(creditCardSpendingChildren);
+				creditCardSpendingGrouping.setCreditCardBill(creditCardSpendingChildren.getCreditCardBill());
+				creditCardSpendingGrouping = creditCardSpendingService.save(creditCardSpendingGrouping); 
+			}	
+			return creditCardSpendingGrouping;
+		} else {
+			return creditCardSpendingService.findById(associationsIdsDTO.getCreditCardIds().get(0));
+		}
+	}
+
+	private Spending getSpendingToAssociate(AssociationsIDSDTO associationsIdsDTO) {
+		if (associationsIdsDTO.getCreditCardIds().size() > 1) {
+			Short type = TypeSpending.GROUP_ASSOCIATION.getCode();
+			Spending spendingGrouping = new Spending(null, null, LocalDateTime.now(), BigDecimal.ZERO, null, type, null, null, null, null, null);
+			for (Long s : associationsIdsDTO.getSpendingsIds()) {
+				Spending spendingChildren = spendingService.findById(s);
+				spendingGrouping.getSpendingsInsallments().add(spendingChildren);
+				spendingGrouping = spendingService.save(spendingGrouping); 
+			}	
+			return spendingGrouping;
+		} else {
+			return spendingService.findById(associationsIdsDTO.getSpendingsIds().get(0));
+		}
+	}
+
+	private void validateRegisters(AssociationsIDSDTO associationsIdsDTO) {
+		// TODO Auto-generated method stub
+		
 	}
 }

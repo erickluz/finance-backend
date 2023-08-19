@@ -2,6 +2,7 @@ package org.erick.finance.resource;
 
 import java.util.List;
 
+import org.erick.finance.dto.AssociationsIDSDTO;
 import org.erick.finance.dto.SpendingCheckAssociationDTO;
 import org.erick.finance.dto.SpendingCheckDTO;
 import org.erick.finance.dto.SpendingCheckMonthDTO;
@@ -69,6 +70,12 @@ public class SpendingCheckMonthResource {
 	@DeleteMapping("/removeCheck/{id}")
 	public ResponseEntity<Void> removeCheckSpending(@PathVariable String id) {
 		spendingCheckMonthService.removeCheckSpending(Long.valueOf(id));
+		return ResponseEntity.noContent().build();
+	}
+	
+	@PostMapping("/associate")
+	public ResponseEntity<Void> associate(@RequestBody AssociationsIDSDTO associationsIdsDTO) {
+		spendingCheckMonthService.associate(associationsIdsDTO);
 		return ResponseEntity.noContent().build();
 	}
 }

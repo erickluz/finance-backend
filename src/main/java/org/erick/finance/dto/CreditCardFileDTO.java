@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.erick.finance.domain.CreditCardSpending;
+import org.erick.finance.domain.CreditCardSpendingType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +28,8 @@ public class CreditCardFileDTO {
 	public CreditCardSpending toCreditCardSpending() {
 		BigDecimal value = parseRawValue();
 		LocalDateTime date = LocalDateTime.parse(this.date + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
-		return new CreditCardSpending(null, this.description, value, date, this.part, null, null);
+		Short type = CreditCardSpendingType.NORMAL.getCode();
+		return new CreditCardSpending(null, this.description, value, date, this.part, type, null, null, null, null);
 	}
 
 	private BigDecimal parseRawValue() {

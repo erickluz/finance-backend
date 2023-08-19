@@ -36,7 +36,8 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 			+ "	LEFT JOIN ccs.creditCardBill ccb "
 			+ "	LEFT JOIN s.card c1 "
 			+ "	LEFT JOIN ccb.card c2 "
-			+ "	WHERE MONTH(s.date) = MONTH(DATE(:spendingsMonth)) AND  YEAR(s.date) = YEAR(DATE(:spendingsMonth)) ")
+			+ "	WHERE MONTH(s.date) = MONTH(DATE(:spendingsMonth)) AND  YEAR(s.date) = YEAR(DATE(:spendingsMonth)) "
+			+ "	ORDER BY s.date, s.id ")
 	List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(LocalDateTime spendingsMonth);
 	
 }

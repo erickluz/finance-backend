@@ -35,7 +35,7 @@ public class SpendingService {
 	
 	public List<Spending> listByMonth(String date) {
 		LocalDateTime datetime = LocalDateTime.parse(date+ " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
-		return rep.listByMonth(datetime.getMonthValue(), datetime.getYear(), TypeSpending.GROUPING.getCode());
+		return rep.listByMonth(datetime.getMonthValue(), datetime.getYear(), TypeSpending.GROUPING_PART.getCode());
 	}
 	
 	public Spending save(Spending spending) {
@@ -90,12 +90,12 @@ public class SpendingService {
 
 	private Short getType(SpendingDTO spendingDTO) {
 		return (spendingDTO.getParts() == null || spendingDTO.getParts().equals("")) 
-				? TypeSpending.NORMAL.getCode() : TypeSpending.GROUPING.getCode();
+				? TypeSpending.NORMAL.getCode() : TypeSpending.GROUPING_PART.getCode();
 	}
 
 	public void delete(Long id) {
 		Spending spending = findById(id);
-		if (spending.getType().equals(TypeSpending.GROUPING.getCode()) || spending.getType().equals(TypeSpending.PART.getCode())) {
+		if (spending.getType().equals(TypeSpending.GROUPING_PART.getCode()) || spending.getType().equals(TypeSpending.PART.getCode())) {
 			Spending spendingGroup = findById(spending.getSpendingGroup().getId());
 			rep.deleteById(spendingGroup.getId());
 		} else {
@@ -114,7 +114,7 @@ public class SpendingService {
 	}
 	
 	public List<String> getListDatesSpending(LocalDateTime initialDate, LocalDateTime finalDate) {
-		List<Integer> dates = rep.getListSpending(TypeSpending.GROUPING.getCode(), initialDate, finalDate);
+		List<Integer> dates = rep.getListSpending(TypeSpending.GROUPING_PART.getCode(), initialDate, finalDate);
 		return dates.stream().map(date -> {
 			return Month.fromNumber(date).getShortName();
 		}).collect(Collectors.toList());

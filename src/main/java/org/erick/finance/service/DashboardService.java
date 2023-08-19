@@ -44,7 +44,7 @@ public class DashboardService {
 		LocalDateTime monthStatsDate =	 getMonthStatsDate(month);
 		BigDecimal budgetValue = budgetService.getBudgetValueByDate(monthStatsDate);
 		BigDecimal monthRevenue = revenueRepository.getTotalRevenueByMonth(monthStatsDate);
-		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING.getCode(), monthStatsDate);
+		BigDecimal monthSpending = spendingRepository.getTotalSpendingByMonth(TypeSpending.GROUPING_PART.getCode(), monthStatsDate);
 		BigDecimal monthBalance = monthRevenue.subtract(monthSpending);
 		BigDecimal monthBudgetMoney = monthRevenue.subtract(budgetValue);
 		BigDecimal monthBalanceGoal = monthBudgetMoney.subtract(monthSpending); 
@@ -66,7 +66,7 @@ public class DashboardService {
 		int lastDay = finalDate.toLocalDate().withDayOfMonth(finalDate.toLocalDate().getMonth().length(finalDate.toLocalDate().isLeapYear())).getDayOfMonth();
 		finalDate = finalDate.withDayOfMonth(lastDay);
 		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(initialDate, finalDate);
-		BigDecimal totalSpeding = spendingRepository.getTotalSpending(initialDate, finalDate, TypeSpending.GROUPING.getCode());
+		BigDecimal totalSpeding = spendingRepository.getTotalSpending(initialDate, finalDate, TypeSpending.GROUPING_PART.getCode());
 		BigDecimal totalBalance = totalRevenue.subtract(totalSpeding);
 		BigDecimal totalBudgetValue = budgetService.getTotalBudgetValue(initialDate, finalDate);
 		BigDecimal totalBudgetBalance = getTotalBudgetBalance(totalBudgetValue, initialDate, finalDate);
@@ -75,7 +75,7 @@ public class DashboardService {
 	}
 
 	private BigDecimal getTotalBudgetBalance(BigDecimal totalBudgetValue, LocalDateTime initialDate, LocalDateTime finalDate) {
-		BigDecimal totalSpending = spendingRepository.getTotalSpending(initialDate, finalDate, TypeSpending.GROUPING.getCode());
+		BigDecimal totalSpending = spendingRepository.getTotalSpending(initialDate, finalDate, TypeSpending.GROUPING_PART.getCode());
 		BigDecimal totalRevenue = revenueRepository.getTotalRevenue(initialDate, finalDate);
 		totalRevenue = totalRevenue.subtract(totalBudgetValue);
 		return totalRevenue.subtract(totalSpending);
@@ -84,7 +84,7 @@ public class DashboardService {
 	public BudgetChart getBudgetChart(String sInitialDate, String sFinalDate) {
 		LocalDateTime initialDate = getInitialDate(sInitialDate);
 		LocalDateTime finalDate = getFinalDate(sFinalDate);
-		List<BigDecimal> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate, TypeSpending.GROUPING.getCode())
+		List<BigDecimal> spendings = spendingRepository.getTotalSpendingPerMonth(initialDate, finalDate, TypeSpending.GROUPING_PART.getCode())
 				.stream()
 				.map(s -> s.setScale(2, RoundingMode.HALF_DOWN))
 				.collect(Collectors.toList());
@@ -143,7 +143,7 @@ public class DashboardService {
 	}
 	
 	public SpendingCategoryDTO getSpendingCategoryChart() {
-		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategory(TypeSpending.GROUPING.getCode()));
+		return new SpendingCategoryDTO(spendingRepository.getListSpendingCategory(TypeSpending.GROUPING_PART.getCode()));
 	}
 	
 	public SpendingCategoryDTO getSpendingCategoryChartPerDate(String initialDate, String finalDate, String budget) {
@@ -152,7 +152,7 @@ public class DashboardService {
 		lInitialDate = lInitialDate.withDayOfMonth(1);
 		LocalDate lFinal = lFinalDate.toLocalDate(); 
 		lFinalDate = lFinalDate.withDayOfMonth(lFinalDate.getMonth().length(lFinal.isLeapYear()));
-		SpendingCategoryDTO spendingCategory = new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING.getCode(), isBudget(budget)));
+		SpendingCategoryDTO spendingCategory = new SpendingCategoryDTO(spendingRepository.getListSpendingCategoryPerDate(lInitialDate, lFinalDate, TypeSpending.GROUPING_PART.getCode(), isBudget(budget)));
 		BigDecimal total = spendingCategory.getItens().stream().map(i -> BigDecimal.valueOf(i.getValue())).reduce(BigDecimal.ZERO, BigDecimal::add);
 		spendingCategory.getItens()
 		.stream()

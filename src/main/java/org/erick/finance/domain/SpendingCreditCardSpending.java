@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -28,4 +29,11 @@ public class SpendingCreditCardSpending {
 	@JoinColumn(name = "idSpendingCheckMonth")
 	@ManyToOne
 	private SpendingCheckMonth spendingCheckMonth;
+	@Override
+	public String toString() {
+		return "SpendingCreditCardSpending [id=" + id + ", creditCardSpending=" + creditCardSpending.getId() + ", spending="
+				+ spending.getId() + ", spendingCheckMonth=" + spendingCheckMonth.getId() + "]";
+	}
+	
+	
 }

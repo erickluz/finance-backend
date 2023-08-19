@@ -3,9 +3,10 @@ package org.erick.finance.domain;
 import java.util.concurrent.ConcurrentHashMap;
 
 public enum TypeSpending {
-	NORMAL		((short) 1, "Normal"),
-	GROUPING	((short) 2, "Grouping"),
-	PART		((short) 3, "Part");
+	NORMAL				((short) 1, "Normal"),
+	GROUPING_PART		((short) 2, "Grouping Part"),
+	PART				((short) 3, "Part"),
+	GROUP_ASSOCIATION 	((short) 4, "Group Association");
 	private static final ConcurrentHashMap<Short, TypeSpending> types = new ConcurrentHashMap<>();  
 	private final Short code;
 	private final String name;
