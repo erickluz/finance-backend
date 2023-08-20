@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,13 +137,18 @@ public class SpendingCheckMonthService {
 	private CreditCardSpending getCreditCardSpendingToAssociate(AssociationsIDSDTO associationsIdsDTO) {
 		if (associationsIdsDTO.getCreditCardIds().size() > 1) {
 			Short type = CreditCardSpendingType.GROUPING.getCode();
-			CreditCardSpending creditCardSpendingGrouping = new CreditCardSpending(null, null, BigDecimal.ZERO, LocalDateTime.now(), null, type, null, null, null, null);
+			CreditCardSpending creditCardSpendingGrouping = new CreditCardSpending(null, null, null, LocalDateTime.now(), null, type, null, new ArrayList<>(), null, null);
+			BigDecimal totalValue = BigDecimal.ZERO;
+			CreditCardSpending creditCardSpendingChildren = null;
 			for (Long ccs : associationsIdsDTO.getCreditCardIds()) {
-				CreditCardSpending creditCardSpendingChildren = creditCardSpendingService.findById(ccs);
+				creditCardSpendingChildren = creditCardSpendingService.findById(ccs);
 				creditCardSpendingGrouping.getCreditCardSpendingsChildren().add(creditCardSpendingChildren);
 				creditCardSpendingGrouping.setCreditCardBill(creditCardSpendingChildren.getCreditCardBill());
-				creditCardSpendingGrouping = creditCardSpendingService.save(creditCardSpendingGrouping); 
-			}	
+				creditCardSpendingChildren.setCreditCardSpendingGrouping(creditCardSpendingGrouping);
+				totalValue = totalValue.add(creditCardSpendingChildren.getValue());
+			}
+			creditCardSpendingGrouping.setValue(totalValue);
+			creditCardSpendingGrouping = creditCardSpendingService.save(creditCardSpendingGrouping);
 			return creditCardSpendingGrouping;
 		} else {
 			return creditCardSpendingService.findById(associationsIdsDTO.getCreditCardIds().get(0));
@@ -150,14 +156,19 @@ public class SpendingCheckMonthService {
 	}
 
 	private Spending getSpendingToAssociate(AssociationsIDSDTO associationsIdsDTO) {
-		if (associationsIdsDTO.getCreditCardIds().size() > 1) {
+		if (associationsIdsDTO.getSpendingsIds().size() > 1) {
 			Short type = TypeSpending.GROUP_ASSOCIATION.getCode();
-			Spending spendingGrouping = new Spending(null, null, LocalDateTime.now(), BigDecimal.ZERO, null, type, null, null, null, null, null);
+			Spending spendingGrouping = new Spending(null, null, LocalDateTime.now(), null, null, type, null, null, new ArrayList<>(), null, null, null);
+			BigDecimal totalValue = BigDecimal.ZERO;
 			for (Long s : associationsIdsDTO.getSpendingsIds()) {
 				Spending spendingChildren = spendingService.findById(s);
 				spendingGrouping.getSpendingsInsallments().add(spendingChildren);
-				spendingGrouping = spendingService.save(spendingGrouping); 
+				spendingGrouping.setDate(spendingChildren.getDate());
+				spendingChildren.setSpendingGroupAssociation(spendingGrouping);
+				totalValue = totalValue.add(spendingChildren.getValue());
 			}	
+			spendingGrouping.setValue(totalValue);
+			spendingGrouping = spendingService.save(spendingGrouping);
 			return spendingGrouping;
 		} else {
 			return spendingService.findById(associationsIdsDTO.getSpendingsIds().get(0));

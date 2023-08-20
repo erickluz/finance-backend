@@ -7,5 +7,6 @@ import org.erick.finance.dto.ItemCategoryDTO;
 
 public interface CustomSpendingRepository {
 	
-	public List<ItemCategoryDTO> getListSpendingCategoryPerDate(LocalDateTime initialDate, LocalDateTime finalDate, Short groupingType, Boolean isBudget);	
+	List<ItemCategoryDTO> getListSpendingCategoryPerDate(LocalDateTime initialDate, LocalDateTime finalDate, Short groupingType, Boolean isBudget);
+
 }

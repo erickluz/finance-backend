@@ -35,7 +35,7 @@ public class SpendingService {
 	
 	public List<Spending> listByMonth(String date) {
 		LocalDateTime datetime = LocalDateTime.parse(date+ " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
-		return rep.listByMonth(datetime.getMonthValue(), datetime.getYear(), TypeSpending.GROUPING_PART.getCode());
+		return rep.listByMonth(datetime.getMonthValue(), datetime.getYear());
 	}
 	
 	public Spending save(Spending spending) {
@@ -49,7 +49,7 @@ public class SpendingService {
 		BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
 		Card card = getCardSpending(spendingDTO);
 		Spending spending = new Spending(parseId(spendingDTO), spendingDTO.getName(), date, value, spendingCategory, getType(spendingDTO), 
-				null, null, card, null, null);
+				null, null, null, card, null, null);
 		spending.setSpendingsInsallments(getParts(spendingDTO, spending, card));
 		return rep.save(spending);
 	}
@@ -82,7 +82,7 @@ public class SpendingService {
 			String name = spendingDTO.getName() + " (" + (i+1) + "/" + parts + ")";				
 			BigDecimal value = BigDecimal.valueOf(Double.valueOf(spendingDTO.getValue()));
 			SpendingCategory spendingCategory = categoryService.findById(Long.valueOf(spendingDTO.getIdCategory()));
-			Spending spendingPart = new Spending(null, name, date, value, spendingCategory, TypeSpending.PART.getCode(), spending, null, card, null, null);
+			Spending spendingPart = new Spending(null, name, date, value, spendingCategory, TypeSpending.PART.getCode(), spending, null, null, card, null, null);
 			date = date.plusMonths(1L);
 			partsSpending.add(spendingPart);
 		}
@@ -114,7 +114,7 @@ public class SpendingService {
 	}
 	
 	public List<String> getListDatesSpending(LocalDateTime initialDate, LocalDateTime finalDate) {
-		List<Integer> dates = rep.getListSpending(TypeSpending.GROUPING_PART.getCode(), initialDate, finalDate);
+		List<Integer> dates = rep.getListSpending(initialDate, finalDate);
 		return dates.stream().map(date -> {
 			return Month.fromNumber(date).getShortName();
 		}).collect(Collectors.toList());
@@ -149,7 +149,7 @@ public class SpendingService {
 			for (int i = 0; i < installments; i++) {
 				String name = spending.getName() + " (" + (i+1) + "/" + installments + ")";				
 				Spending spendingPart = new Spending(null, name, date, spending.getValue(), spending.getCategory(), TypeSpending.PART.getCode(), 
-						spending, null, spending.getCard(), null, null);
+						spending, null, null, spending.getCard(), null, null);
 				date = date.plusMonths(1L);
 				spending.getSpendingsInsallments().add(spendingPart);
 			}

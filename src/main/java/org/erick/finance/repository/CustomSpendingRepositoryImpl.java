@@ -48,4 +48,5 @@ public class CustomSpendingRepositoryImpl implements CustomSpendingRepository {
 		return query;
 	}
 
+
 }

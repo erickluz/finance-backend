@@ -26,18 +26,28 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 			+ "	to_date(CONCAT('01/' , EXTRACT(MONTH FROM date) , '/' , EXTRACT(year FROM date)), 'DD/MM/YYYY')"
 			+ "ORDER BY date", nativeQuery = true)
 	List<Date> getMissingMonthsSpendingCheckMonth();
-
-	@Query("	SELECT new org.erick.finance.dto.SpendingCheckAssociationDTO(s.id, s.name, s.date, sc.id, c1.isChkByFile, c1.issuer, s.value, "
-			+ "		ccs.id, ccs.description, ccs.date, sccs.id, c2.isChkByFile, c2.issuer, ccs.value) "
-			+ "	FROM Spending s "
-			+ "	LEFT JOIN s.spendingsCheck sc "
-			+ "	LEFT JOIN s.spendingsCreditCardSpending sccs "
-			+ "	LEFT JOIN sccs.creditCardSpending ccs "
-			+ "	LEFT JOIN ccs.creditCardBill ccb "
-			+ "	LEFT JOIN s.card c1 "
-			+ "	LEFT JOIN ccb.card c2 "
-			+ "	WHERE MONTH(s.date) = MONTH(DATE(:spendingsMonth)) AND  YEAR(s.date) = YEAR(DATE(:spendingsMonth)) "
-			+ "	ORDER BY s.date, s.id ")
+	
+	@Query(value = 
+	 "	SELECT new org.erick.finance.dto.SpendingCheckAssociationDTO(s.id, s.name, s.date, sc.id, c1.isChkByFile, c1.issuer, s.value, "
+	+ "		ccs.id, ccs.description, ccs.date, sccs.id, c2.isChkByFile, c2.issuer, ccs.value) "
+	+ "	FROM Spending s "
+	+ "	LEFT JOIN s.spendingsCheck sc "
+	+ "	LEFT JOIN sc.spendingCheckMonth scm "
+	+ "	LEFT JOIN s.spendingsCreditCardSpending sccs "
+	+ "	LEFT JOIN sccs.creditCardSpending ccs "
+	+ "	LEFT JOIN ccs.creditCardBill ccb "
+	+ "	LEFT JOIN s.card c1 "
+	+ "	LEFT JOIN ccb.card c2 "
+	+ "	WHERE MONTH(s.date) = MONTH(DATE(:spendingsMonth)) AND YEAR(s.date) = YEAR(DATE(:spendingsMonth)) "
+	+ "	AND s.id NOT IN (	"
+	+ "		SELECT s2.id "
+	+ "		FROM Spending s2	"
+	+ "		INNER JOIN s2.spendingGroupAssociation sg	"
+	+ "		WHERE MONTH(s2.date) = MONTH(DATE(:spendingsMonth)) AND YEAR(s2.date) = YEAR(DATE(:spendingsMonth)) "
+	+ "		AND s2.type	IN (1, 3) "
+	+ "		AND sg.type	= 4 "
+	+ "	)		"
+	+ "	ORDER BY s.date, s.id ")
 	List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(LocalDateTime spendingsMonth);
 	
 }

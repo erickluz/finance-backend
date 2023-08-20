@@ -41,6 +41,10 @@ public class Spending {
 	@ManyToOne
 	private Spending spendingGroup;
 	@JsonIgnore
+	@JoinColumn(name = "idSpendingGroupAssociation")
+	@ManyToOne
+	private Spending spendingGroupAssociation;
+	@JsonIgnore
 	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Spending> spendingsInsallments = new ArrayList<>();
 	@JsonIgnore
