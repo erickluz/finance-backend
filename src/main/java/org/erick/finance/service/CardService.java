@@ -22,6 +22,8 @@ public class CardService {
 	private CreditCardSpendingService creditCardSpendingService;
 	@Autowired
 	private CreditCardBillService creditCardBillService;
+	@Autowired
+	private SpendingCheckMonthService spendingCheckMonthService;
 
 	public List<Card> listAll() {
 		return rep.findAll();
@@ -54,6 +56,7 @@ public class CardService {
 				creditCardSpendingService.save(creditCardSpending);
 			}
 		});
+		spendingCheckMonthService.autoAssociate(creditCardBill.getDueDate().minusMonths(1L));
 	}
 
 	private boolean isRegisterIsAlreadyExist(CreditCardSpending register, CreditCardBill creditCardBill) {

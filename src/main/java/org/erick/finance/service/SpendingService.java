@@ -13,6 +13,7 @@ import org.erick.finance.domain.SpendingCategory;
 import org.erick.finance.domain.TypeSpending;
 import org.erick.finance.dto.DateDTO;
 import org.erick.finance.dto.SpendingDTO;
+import org.erick.finance.repository.CardRepository;
 import org.erick.finance.repository.SpendingRepository;
 import org.erick.finance.util.Month;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class SpendingService {
 	@Autowired
 	private UtilService utilService;
 	@Autowired
-	private CardService cardService;
+	private CardRepository cardrep;
 	
 	public List<Spending> listAll() {
 		return rep.findAll();
@@ -57,7 +58,7 @@ public class SpendingService {
 	private Card getCardSpending(SpendingDTO spendingDTO) {
 		Card card = null;
 		if (spendingDTO.getIdCard() != null) {
-			card = cardService.findById(Long.valueOf(spendingDTO.getIdCard()));
+			card = cardrep.findById(Long.valueOf(spendingDTO.getIdCard())).orElse(null);
 		}
 		return card;
 	}

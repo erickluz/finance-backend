@@ -17,6 +17,7 @@ import org.erick.finance.domain.SpendingCheck;
 import org.erick.finance.domain.SpendingCheckMonth;
 import org.erick.finance.domain.SpendingCreditCardSpending;
 import org.erick.finance.domain.TypeSpending;
+import org.erick.finance.dto.AssociationIdDTO;
 import org.erick.finance.dto.AssociationsIDSDTO;
 import org.erick.finance.dto.ItemCheckSpendingDTO;
 import org.erick.finance.dto.SpendingCheckAssociationDTO;
@@ -189,7 +190,7 @@ public class SpendingCheckMonthService {
 		if (spending.getType().equals(TypeSpending.GROUP_ASSOCIATION.getCode())) {
 			spending.getSpendingsChildrens().forEach(s -> {
 				s.setSpendingGroupAssociation(null);
-				s =spendingService.save(s);
+				s = spendingService.save(s);
 			});
 			spendingService.delete(spending.getId());			
 		}
@@ -206,5 +207,18 @@ public class SpendingCheckMonthService {
 	private void validateDesassociateRegisters(AssociationsIDSDTO associationsIdsDTO) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void autoAssociate(LocalDateTime date) {
+		List<AssociationIdDTO> associations = rep.autoAssociations(date, date.plusMonths(1L));
+		SpendingCheckMonth spendingCheckMonth = rep.findByDate(date);
+		associations.forEach(a -> {
+			Spending spending = spendingService.findById(a.getIdSpending());
+			CreditCardSpending creditCardSpending = creditCardSpendingService.findById(a.getIdCreditCardSpending());
+			if (spendingCreditCardSpendingRepository.findByIdSendingAndIdCreditCardSpending(spending.getId(), creditCardSpending.getId()) == null) {
+				SpendingCreditCardSpending spendingCreditCardSpending = new SpendingCreditCardSpending(null, creditCardSpending, spending, spendingCheckMonth);
+				spendingCreditCardSpendingRepository.save(spendingCreditCardSpending);
+			}
+		});
 	}
 }

@@ -1,5 +1,7 @@
 package org.erick.finance.resource;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.erick.finance.dto.AssociationsIDSDTO;
@@ -79,10 +81,17 @@ public class SpendingCheckMonthResource {
 		return ResponseEntity.noContent().build();
 	}
 	
-	@CrossOrigin()
 	@PostMapping("/desassociate")
 	public ResponseEntity<Void> desassociate(@RequestBody AssociationsIDSDTO associationsIdsDTO) {
 		spendingCheckMonthService.desassociate(associationsIdsDTO);
 		return ResponseEntity.noContent().build();
 	}
+	
+	@PostMapping("/auto")
+	public ResponseEntity<Void> auto(@RequestBody String sdate) {
+		LocalDateTime date = LocalDateTime.parse(sdate + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
+		spendingCheckMonthService.autoAssociate(date);
+		return ResponseEntity.noContent().build();
+	}
+	
 }

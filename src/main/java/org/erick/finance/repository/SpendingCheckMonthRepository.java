@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.erick.finance.domain.SpendingCheckMonth;
 import org.erick.finance.domain.SpendingCreditCardSpending;
+import org.erick.finance.dto.AssociationIdDTO;
 import org.erick.finance.dto.SpendingCheckAssociationDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -40,6 +41,7 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 	+ "	LEFT JOIN s.card c1 "
 	+ "	LEFT JOIN ccb.card c2 "
 	+ "	WHERE MONTH(s.date) = MONTH(DATE(:spendingsMonth)) AND YEAR(s.date) = YEAR(DATE(:spendingsMonth)) "
+	+ "	AND s.type IN (1, 3, 4) "
 	+ "	AND s.id NOT IN (	"
 	+ "		SELECT s2.id "
 	+ "		FROM Spending s2	"
@@ -58,5 +60,27 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 			+ "	WHERE s.id = :idSpending"
 			+ "	AND ccs.id = :idCreditCardSpending	")
 	SpendingCreditCardSpending findByIdSpendingAndIdCreditCardSpending(Long idSpending, Long idCreditCardSpending);
+
+	@Query("	SELECT new org.erick.finance.dto.AssociationIdDTO(s.id, ccs.id)"
+			+ "	FROM Spending s "
+			+ "	INNER JOIN CreditCardSpending ccs ON ("
+			+ "		DAY(s.date) = DAY(ccs.date) "
+//			+ "		AND MONTH(s.date) = MONTH(ccs.date) "
+			+ "		AND YEAR(s.date) = YEAR(ccs.date) "
+			+ "		AND s.value = ccs.value	"
+			+ "	)"
+			+ "	INNER JOIN ccs.creditCardBill ccb "
+			+ "	WHERE MONTH(s.date) = MONTH(DATE(:date)) "
+			+ "	AND YEAR(s.date) = YEAR(DATE(:date)) "
+			+ "	AND MONTH(ccb.dueDate) = MONTH(DATE(:dateBill)) "
+			+ "	AND YEAR(ccb.dueDate) = YEAR(DATE(:dateBill)) "
+			+ "	AND s.type IN (1, 3) "
+			+ "	AND ccs.type = 1 ")
+	List<AssociationIdDTO> autoAssociations(LocalDateTime date, LocalDateTime dateBill);
+
+	@Query("	SELECT scm FROM SpendingCheckMonth scm "
+			+ "	WHERE MONTH(scm.date) = MONTH(DATE(:date)) "
+			+ "	AND YEAR(scm.date) = YEAR(DATE(:date))")
+	SpendingCheckMonth findByDate(LocalDateTime date);
 	
 }
