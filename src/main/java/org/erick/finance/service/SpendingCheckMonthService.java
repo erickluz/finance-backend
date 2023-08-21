@@ -88,10 +88,10 @@ public class SpendingCheckMonthService {
 		return new SpendingCheckMonthDTO(spendingCheckMonth.getId().toString(), nameMonth, date, spendingCheckMonth.getIsChecked());
 	}
 	
-	public List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(String date) {
+	public List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(String date, String association, String associable) {
 		LocalDateTime spendingDate = LocalDateTime.parse(date + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
 		LocalDateTime creditCardSpendingDate = spendingDate.plusMonths(1L);
-		List<SpendingCheckAssociationDTO> spendingsCheckAssociation = rep.getSpendingsCheckAssociation(spendingDate);
+		List<SpendingCheckAssociationDTO> spendingsCheckAssociation = rep.getSpendingsCheckAssociation(spendingDate, association, associable);
 		getCreditCardSpendingsWithoutAssociation(creditCardSpendingDate, spendingsCheckAssociation);
 		return spendingsCheckAssociation;
 	}

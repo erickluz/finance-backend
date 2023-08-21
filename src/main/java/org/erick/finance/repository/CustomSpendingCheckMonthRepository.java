@@ -6,5 +6,6 @@ import java.util.List;
 import org.erick.finance.dto.SpendingCheckAssociationDTO;
 
 public interface CustomSpendingCheckMonthRepository {
-	List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(LocalDateTime spendingsMonth);
+	List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(LocalDateTime spendingsMonth, String association, String associable);
+	
 }

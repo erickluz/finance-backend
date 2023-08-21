@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class SpendingCheckAssociationDTO {
 	private ItemCheckSpendingDTO spending;
 	private ItemCheckSpendingDTO creditCardSpending;
@@ -28,9 +30,5 @@ public class SpendingCheckAssociationDTO {
 		String sccsValue = (ccsValue != null) ? ccsValue.toString() : null;
 		this.creditCardSpending = new ItemCheckSpendingDTO(sccsId, ccsDescription, dateCreditCardSpendig, ccsCardIssuer, sccsValue, ccsIsCardChkByFile, false);
 	}
-	
-	public SpendingCheckAssociationDTO(ItemCheckSpendingDTO spendingDTO, ItemCheckSpendingDTO creditCardSpending) {
-		this.spending = spendingDTO;
-		this.creditCardSpending = creditCardSpending;
-	}
+
 }

@@ -59,8 +59,11 @@ public class SpendingCheckMonthResource {
 	}
 	
 	@GetMapping("/associations")
-	public ResponseEntity<List<SpendingCheckAssociationDTO>> getSpendingCheckAssociations(@RequestParam String date) {
-		return ResponseEntity.ok(spendingCheckMonthService.getSpendingsCheckAssociation(date));
+	public ResponseEntity<List<SpendingCheckAssociationDTO>> getSpendingCheckAssociations(
+			@RequestParam String date, 
+			@RequestParam String association, 
+			@RequestParam String associable) {
+		return ResponseEntity.ok(spendingCheckMonthService.getSpendingsCheckAssociation(date, association, associable));
 	}
 	
 	@PostMapping("/check")
