@@ -78,4 +78,11 @@ public class SpendingCheckMonthResource {
 		spendingCheckMonthService.associate(associationsIdsDTO);
 		return ResponseEntity.noContent().build();
 	}
+	
+	@CrossOrigin()
+	@PostMapping("/desassociate")
+	public ResponseEntity<Void> desassociate(@RequestBody AssociationsIDSDTO associationsIdsDTO) {
+		spendingCheckMonthService.desassociate(associationsIdsDTO);
+		return ResponseEntity.noContent().build();
+	}
 }

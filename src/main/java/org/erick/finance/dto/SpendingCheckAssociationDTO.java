@@ -15,12 +15,13 @@ public class SpendingCheckAssociationDTO {
 
 	public SpendingCheckAssociationDTO(Long spendigId, String spendingName, LocalDateTime spendingDate, Long idSpendingCheck,
 			Boolean isSpendingCardChkByFile, String spendingCardIssuer, BigDecimal spendingValue, Long ccsId, String ccsDescription,
-			LocalDateTime ccsDate, Long ccsIdSpendingCreditCardSpending, Boolean ccsIsCardChkByFile, String ccsCardIssuer, BigDecimal ccsValue) {
+			LocalDateTime ccsDate, Long ccsIdSpendingCreditCardSpending, Boolean ccsIsCardChkByFile, String ccsCardIssuer, BigDecimal ccsValue, Short typeSpending) {
 
-		isSpendingCardChkByFile = (isSpendingCardChkByFile == null) ? false : isSpendingCardChkByFile;
+		Boolean isAssociable = (typeSpending != 4) ? (isSpendingCardChkByFile == null) ? false : isSpendingCardChkByFile : true;
+		
 		String dateSpending = spendingDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-		Boolean isSpendingChk = (!isSpendingCardChkByFile) ? (idSpendingCheck != null) : false; 
-		this.spending = new ItemCheckSpendingDTO(spendigId.toString(), spendingName, dateSpending, spendingCardIssuer, spendingValue.toString(), isSpendingCardChkByFile, isSpendingChk);
+		Boolean isSpendingChk = (!isAssociable) ? (idSpendingCheck != null) : false; 
+		this.spending = new ItemCheckSpendingDTO(spendigId.toString(), spendingName, dateSpending, spendingCardIssuer, spendingValue.toString(), isAssociable, isSpendingChk);
 
 		String dateCreditCardSpendig = (ccsDate != null) ? ccsDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : null;
 		String sccsId = (ccsId != null) ? ccsId.toString() : null; 

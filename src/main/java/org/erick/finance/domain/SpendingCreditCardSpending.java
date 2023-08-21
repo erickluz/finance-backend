@@ -28,11 +28,6 @@ public class SpendingCreditCardSpending {
 	@JoinColumn(name = "idSpendingCheckMonth")
 	@ManyToOne
 	private SpendingCheckMonth spendingCheckMonth;
-	@Override
-	public String toString() {
-		return "SpendingCreditCardSpending [id=" + id + ", creditCardSpending=" + creditCardSpending.getId() + ", spending="
-				+ spending.getId() + ", spendingCheckMonth=" + spendingCheckMonth.getId() + "]";
-	}
 	
 	
 }

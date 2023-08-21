@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.erick.finance.domain.SpendingCheckMonth;
+import org.erick.finance.domain.SpendingCreditCardSpending;
 import org.erick.finance.dto.SpendingCheckAssociationDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,7 +30,7 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 	
 	@Query(value = 
 	 "	SELECT new org.erick.finance.dto.SpendingCheckAssociationDTO(s.id, s.name, s.date, sc.id, c1.isChkByFile, c1.issuer, s.value, "
-	+ "		ccs.id, ccs.description, ccs.date, sccs.id, c2.isChkByFile, c2.issuer, ccs.value) "
+	+ "		ccs.id, ccs.description, ccs.date, sccs.id, c2.isChkByFile, c2.issuer, ccs.value, s.type) "
 	+ "	FROM Spending s "
 	+ "	LEFT JOIN s.spendingsCheck sc "
 	+ "	LEFT JOIN sc.spendingCheckMonth scm "
@@ -49,5 +50,13 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 	+ "	)		"
 	+ "	ORDER BY s.date, s.id ")
 	List<SpendingCheckAssociationDTO> getSpendingsCheckAssociation(LocalDateTime spendingsMonth);
+
+	@Query("	SELECT sccs "
+			+ "	FROM SpendingCreditCardSpending sccs "
+			+ "	INNER JOIN sccs.spending s "
+			+ "	INNER JOIN sccs.creditCardSpending ccs "
+			+ "	WHERE s.id = :idSpending"
+			+ "	AND ccs.id = :idCreditCardSpending	")
+	SpendingCreditCardSpending findByIdSpendingAndIdCreditCardSpending(Long idSpending, Long idCreditCardSpending);
 	
 }

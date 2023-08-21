@@ -39,7 +39,7 @@ public class CreditCardSpending {
 	@JoinColumn(name = "idCreditCardSpendingGrouping")
 	private CreditCardSpending creditCardSpendingGrouping;
 	@JsonIgnore
-	@OneToMany(mappedBy = "creditCardSpendingGrouping", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "creditCardSpendingGrouping", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	private List<CreditCardSpending> creditCardSpendingsChildren = new ArrayList<>();
 	@JsonIgnore
 	@JoinColumn(name = "idCreditCardBill")

@@ -121,8 +121,7 @@ public class SpendingCheckMonthService {
 
 	@Transactional
 	public void associate(AssociationsIDSDTO associationsIdsDTO) {
-		System.out.println(associationsIdsDTO.toString());
-		validateRegisters(associationsIdsDTO);
+		validateAssociateRegisters(associationsIdsDTO);
 		Spending spendingToAssociate = getSpendingToAssociate(associationsIdsDTO);
 		CreditCardSpending creditCardSpendingToAssociate = getCreditCardSpendingToAssociate(associationsIdsDTO);
 		SpendingCheckMonth spendingCheckMonth = getSpendingCheckMonth(associationsIdsDTO);
@@ -158,11 +157,11 @@ public class SpendingCheckMonthService {
 	private Spending getSpendingToAssociate(AssociationsIDSDTO associationsIdsDTO) {
 		if (associationsIdsDTO.getSpendingsIds().size() > 1) {
 			Short type = TypeSpending.GROUP_ASSOCIATION.getCode();
-			Spending spendingGrouping = new Spending(null, null, LocalDateTime.now(), null, null, type, null, null, new ArrayList<>(), null, null, null);
+			Spending spendingGrouping = new Spending(null, null, LocalDateTime.now(), null, null, type, null, null, null, new ArrayList<>(), null, null, null);
 			BigDecimal totalValue = BigDecimal.ZERO;
 			for (Long s : associationsIdsDTO.getSpendingsIds()) {
 				Spending spendingChildren = spendingService.findById(s);
-				spendingGrouping.getSpendingsInsallments().add(spendingChildren);
+				spendingGrouping.getSpendingsChildrens().add(spendingChildren);
 				spendingGrouping.setDate(spendingChildren.getDate());
 				spendingChildren.setSpendingGroupAssociation(spendingGrouping);
 				totalValue = totalValue.add(spendingChildren.getValue());
@@ -175,7 +174,36 @@ public class SpendingCheckMonthService {
 		}
 	}
 
-	private void validateRegisters(AssociationsIDSDTO associationsIdsDTO) {
+	private void validateAssociateRegisters(AssociationsIDSDTO associationsIdsDTO) {
+		// TODO Auto-generated method stub
+	}
+
+	public void desassociate(AssociationsIDSDTO associationsIdsDTO) {
+		validateDesassociateRegisters(associationsIdsDTO);
+		Long idSpending = associationsIdsDTO.getSpendingsIds().get(0);
+		Spending spending = spendingService.findById(idSpending);
+		Long idCreditCardSpending = associationsIdsDTO.getCreditCardIds().get(0);
+		CreditCardSpending creditCardSpending = creditCardSpendingService.findById(idCreditCardSpending);
+		SpendingCreditCardSpending spendingCreditCardSpending = rep.findByIdSpendingAndIdCreditCardSpending(idSpending, idCreditCardSpending);
+		spendingCreditCardSpendingRepository.deleteById(spendingCreditCardSpending.getId());
+		if (spending.getType().equals(TypeSpending.GROUP_ASSOCIATION.getCode())) {
+			spending.getSpendingsChildrens().forEach(s -> {
+				s.setSpendingGroupAssociation(null);
+				s =spendingService.save(s);
+			});
+			spendingService.delete(spending.getId());			
+		}
+		if (creditCardSpending.getType().equals(CreditCardSpendingType.GROUPING.getCode())) {
+			creditCardSpending.getCreditCardSpendingsChildren().forEach(ccs -> {
+				ccs.setCreditCardSpendingGrouping(null);
+				ccs = creditCardSpendingService.save(ccs);
+			});
+			creditCardSpendingService.delete(creditCardSpending.getId());						
+		}
+		
+	}
+	
+	private void validateDesassociateRegisters(AssociationsIDSDTO associationsIdsDTO) {
 		// TODO Auto-generated method stub
 		
 	}

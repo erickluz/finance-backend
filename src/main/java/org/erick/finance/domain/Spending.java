@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -45,8 +46,11 @@ public class Spending {
 	@ManyToOne
 	private Spending spendingGroupAssociation;
 	@JsonIgnore
-	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "spendingGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private List<Spending> spendingsInsallments = new ArrayList<>();
+	@JsonIgnore
+	@OneToMany(mappedBy = "spendingGroupAssociation", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private List<Spending> spendingsChildrens = new ArrayList<>();
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "idCard")
