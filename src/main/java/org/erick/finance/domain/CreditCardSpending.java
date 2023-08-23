@@ -14,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
@@ -34,6 +36,9 @@ public class CreditCardSpending {
 	private String part;
 	@JsonIgnore
 	private Short type;
+	@ColumnDefault("false")
+	private Boolean isJustified;
+	private String justification;
 	@ManyToOne
 	@JsonIgnore
 	@JoinColumn(name = "idCreditCardSpendingGrouping")

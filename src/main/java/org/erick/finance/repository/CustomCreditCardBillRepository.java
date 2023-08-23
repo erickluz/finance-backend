@@ -7,5 +7,5 @@ import org.erick.finance.domain.CreditCardSpending;
 
 public interface CustomCreditCardBillRepository {
 
-	List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate);
+	List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate, String association);
 }

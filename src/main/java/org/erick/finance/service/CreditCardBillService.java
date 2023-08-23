@@ -54,8 +54,8 @@ public class CreditCardBillService {
 		return rep.findById(id).orElse(null);
 	}
 
-	public List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate) {
-		return rep.getCreditCardSpendingByDueDateBill(creditCardSpendingDate);
+	public List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate, String association) {
+		return rep.getCreditCardSpendingByDueDateBill(creditCardSpendingDate, association);
 	}
 	
 }

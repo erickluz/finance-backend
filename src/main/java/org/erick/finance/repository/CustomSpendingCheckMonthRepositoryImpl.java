@@ -20,7 +20,7 @@ public class CustomSpendingCheckMonthRepositoryImpl implements CustomSpendingChe
 		StringBuilder sql = new StringBuilder();
 		
 		sql.append("	 	SELECT new org.erick.finance.dto.SpendingCheckAssociationDTO(s.id, s.name, s.date, sc.id, c1.isChkByFile, c1.issuer, s.value, "
-				+ " 		ccs.id, ccs.description, ccs.date, sccs.id, c2.isChkByFile, c2.issuer, ccs.value, s.type) "
+				+ " 		ccs.id, ccs.description, ccs.date, sccs.id, c2.isChkByFile, c2.issuer, ccs.value, s.type, ccs.isJustified) "
 				+ " 	FROM Spending s "
 				+ " 	LEFT JOIN s.spendingsCheck sc "
 				+ " 	LEFT JOIN sc.spendingCheckMonth scm "

@@ -92,20 +92,27 @@ public class SpendingCheckMonthService {
 		LocalDateTime spendingDate = LocalDateTime.parse(date + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yyyy[ HH:mm:ss]"));
 		LocalDateTime creditCardSpendingDate = spendingDate.plusMonths(1L);
 		List<SpendingCheckAssociationDTO> spendingsCheckAssociation = rep.getSpendingsCheckAssociation(spendingDate, association, associable);
-		getCreditCardSpendingsWithoutAssociation(creditCardSpendingDate, spendingsCheckAssociation);
+		getCreditCardSpendingsWithoutAssociation(creditCardSpendingDate, spendingsCheckAssociation, association);
 		return spendingsCheckAssociation;
 	}
 
 	private void getCreditCardSpendingsWithoutAssociation(LocalDateTime creditCardSpendingDate,
-			List<SpendingCheckAssociationDTO> spendingsCheckAssociation) {
-		List<CreditCardSpending> creditCardSpendings = creditCardbillService.getCreditCardSpendingByDueDateBill(creditCardSpendingDate);
+			List<SpendingCheckAssociationDTO> spendingsCheckAssociation, String association) {
+		List<CreditCardSpending> creditCardSpendings = creditCardbillService.getCreditCardSpendingByDueDateBill(creditCardSpendingDate, association);
 		creditCardSpendings.forEach(ccs -> {
 			ItemCheckSpendingDTO spending = new ItemCheckSpendingDTO();
 			ItemCheckSpendingDTO creditCardSpending = new ItemCheckSpendingDTO(ccs.getId().toString(), ccs.getDescription(), ccs.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-					, ccs.getCreditCardBill().getCard().getIssuer(), ccs.getValue().toString(), ccs.getCreditCardBill().getCard().getIsChkByFile(), false);
+					, ccs.getCreditCardBill().getCard().getIssuer(), ccs.getValue().toString(), ccs.getCreditCardBill().getCard().getIsChkByFile(), false, ccs.getIsJustified());
 			SpendingCheckAssociationDTO spendingCheckAssociationDTO = new SpendingCheckAssociationDTO(spending, creditCardSpending);
 			spendingsCheckAssociation.add(spendingCheckAssociationDTO);
+			verifyJustifiedCreditCard(spendingCheckAssociationDTO, ccs);
 		});
+	}
+
+	private void verifyJustifiedCreditCard(SpendingCheckAssociationDTO spendingCheckAssociationDTO, CreditCardSpending creditCardSpending) {
+		if (creditCardSpending.getIsJustified() != null && creditCardSpending.getIsJustified()) {
+			spendingCheckAssociationDTO.getSpending().setName("Justification: " + creditCardSpending.getJustification());
+		}
 	}
 
 	public void checkSpending(SpendingCheckDTO spendingCheckDTO) {
@@ -137,7 +144,7 @@ public class SpendingCheckMonthService {
 	private CreditCardSpending getCreditCardSpendingToAssociate(AssociationsIDSDTO associationsIdsDTO) {
 		if (associationsIdsDTO.getCreditCardIds().size() > 1) {
 			Short type = CreditCardSpendingType.GROUPING.getCode();
-			CreditCardSpending creditCardSpendingGrouping = new CreditCardSpending(null, null, null, LocalDateTime.now(), null, type, null, new ArrayList<>(), null, null);
+			CreditCardSpending creditCardSpendingGrouping = new CreditCardSpending(null, null, null, LocalDateTime.now(), null, type, false, null, null, new ArrayList<>(), null, null);
 			BigDecimal totalValue = BigDecimal.ZERO;
 			CreditCardSpending creditCardSpendingChildren = null;
 			for (Long ccs : associationsIdsDTO.getCreditCardIds()) {
@@ -220,5 +227,23 @@ public class SpendingCheckMonthService {
 				spendingCreditCardSpendingRepository.save(spendingCreditCardSpending);
 			}
 		});
+	}
+
+	public void justify(AssociationsIDSDTO associationsIdsDTO, String justification) {
+		validateJustification(associationsIdsDTO);
+		CreditCardSpending creditCardSpending = creditCardSpendingService.findById(associationsIdsDTO.getCreditCardIds().get(0));
+		if (creditCardSpending.getIsJustified() == null || !creditCardSpending.getIsJustified()) {
+			creditCardSpending.setIsJustified(true);
+			creditCardSpending.setJustification(justification);
+		} else {
+			creditCardSpending.setIsJustified(false);
+			creditCardSpending.setJustification(null);
+		}
+		creditCardSpendingService.save(creditCardSpending);
+	}
+
+	private void validateJustification(AssociationsIDSDTO associationsIdsDTO) {
+		// TODO Auto-generated method stub
+		
 	}
 }

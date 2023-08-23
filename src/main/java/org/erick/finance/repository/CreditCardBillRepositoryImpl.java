@@ -17,7 +17,7 @@ public class CreditCardBillRepositoryImpl implements CustomCreditCardBillReposit
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate) {
+	public List<CreditCardSpending> getCreditCardSpendingByDueDateBill(LocalDateTime creditCardSpendingDate, String association) {
 		StringBuilder sql = new StringBuilder(); 
 		
 		sql.append("	SELECT ccs FROM CreditCardSpending ccs ");
@@ -28,6 +28,7 @@ public class CreditCardBillRepositoryImpl implements CustomCreditCardBillReposit
 		sql.append("	AND YEAR(ccb.dueDate) = YEAR(DATE(:creditCardSpendingDate)) ");
 		sql.append("	AND sccs.id IS NULL ");
 		sql.append("	AND ccs.type =  " + CreditCardSpendingType.NORMAL.getCode());
+		sql.append(filterAssociation(association));
 		sql.append("	AND ccs.id NOT IN ( ");
 		sql.append("		SELECT ccs2.id FROM CreditCardSpending ccs2	");
 		sql.append("		INNER JOIN ccs2.creditCardSpendingGrouping ccs2g ");
@@ -41,6 +42,14 @@ public class CreditCardBillRepositoryImpl implements CustomCreditCardBillReposit
 		equery.setParameter("creditCardSpendingDate", creditCardSpendingDate);
 		
 		return (List<CreditCardSpending>) equery.getResultList();
+	}
+
+	private String filterAssociation(String association) {
+		String filter = null;
+		if (association.equals("Unassociated")) {
+			filter = "	AND ccs.isJustified IS NOT TRUE ";
+		}
+		return filter;
 	}
 
 }

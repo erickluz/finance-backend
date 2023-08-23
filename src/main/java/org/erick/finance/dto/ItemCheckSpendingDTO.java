@@ -15,4 +15,5 @@ public class ItemCheckSpendingDTO {
 	private String value;
 	private Boolean isAssociable;
 	private Boolean checked;
+	private Boolean isJustified;
 }

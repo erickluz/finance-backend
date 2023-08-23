@@ -97,4 +97,10 @@ public class SpendingCheckMonthResource {
 		return ResponseEntity.noContent().build();
 	}
 	
+	@PostMapping("/justify")
+	public ResponseEntity<Void> justify(@RequestBody AssociationsIDSDTO associationsIdsDTO, @RequestParam(required = false) String justification) {
+		spendingCheckMonthService.justify(associationsIdsDTO, justification);
+		return ResponseEntity.noContent().build();
+	}
+	
 }

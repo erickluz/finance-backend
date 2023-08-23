@@ -4,9 +4,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public enum CardType {
-	VR		((short) 1, "VR"),
-	DEBIT 	((short) 2, "Debit"),
-	CREDIT	((short) 3, "Credit");
+	VR			((short) 1, "VR"),
+	DEBIT 		((short) 2, "Debit"),
+	CREDIT		((short) 3, "Credit"),
+	BORROWED	((short) 4, "Borrowed Card");
 	
 	private static final Map<Short, CardType> cards = new ConcurrentHashMap<>(); 
 	
