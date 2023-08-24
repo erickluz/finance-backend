@@ -25,6 +25,7 @@ public class CustomSpendingRepositoryImpl implements CustomSpendingRepository {
 		sql.append("	LEFT JOIN s.card c ");
 		sql.append("	WHERE s.date BETWEEN :initialDate AND :finalDate ");
 		sql.append("	AND s.type <> :groupingType ");
+		sql.append("	AND c.type <> 4 ");
 		if (isBudget != null) {
 			sql.append(isBudget(isBudget));
 		}

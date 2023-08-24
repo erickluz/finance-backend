@@ -62,8 +62,10 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 	@Query("SELECT new org.erick.finance.dto.ItemCategoryDTO(SUM(s.value), c.name) "
 			+ "FROM Spending s "
 			+ "INNER JOIN s.category c "
+			+ "INNER JOIN s.card ca "
 			+ "WHERE MONTH(s.date) = MONTH(current_date) AND YEAR(s.date) = YEAR(current_date) "
 			+ "	AND s.type IN (1, 3) "
+			+ "	AND ca.type <> (4) "
 			+ "GROUP BY c.name ")
 	public List<ItemCategoryDTO> getListSpendingCategory();
 	
