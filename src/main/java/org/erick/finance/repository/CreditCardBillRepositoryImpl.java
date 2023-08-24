@@ -45,7 +45,7 @@ public class CreditCardBillRepositoryImpl implements CustomCreditCardBillReposit
 	}
 
 	private String filterAssociation(String association) {
-		String filter = null;
+		String filter = " ";
 		if (association.equals("Unassociated")) {
 			filter = "	AND ccs.isJustified IS NOT TRUE ";
 		}
