@@ -93,8 +93,10 @@ public interface SpendingRepository extends JpaRepository<Spending, Long>, Custo
 
 	@Query("	SELECT coalesce(SUM(s.value), 0.0) "
 			+ " FROM Spending s "
+			+ " INNER JOIN s.card c "
 			+ " WHERE s.date BETWEEN :initialDate AND :finalDate "
-			+ " AND s.type = 3 ")
+			+ " AND s.type = 3 "
+			+ " AND c.type IN (3, 4) ")
 	public BigDecimal getTotalDebt(LocalDateTime initialDate, LocalDateTime finalDate);
 
 }
