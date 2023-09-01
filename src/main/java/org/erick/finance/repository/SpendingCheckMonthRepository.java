@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.erick.finance.domain.SpendingCheckMonth;
 import org.erick.finance.domain.SpendingCreditCardSpending;
 import org.erick.finance.dto.AssociationIdDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -81,5 +84,48 @@ public interface SpendingCheckMonthRepository extends JpaRepository<SpendingChec
 			+ "	WHERE MONTH(scm.date) = MONTH(DATE(:date)) "
 			+ "	AND YEAR(scm.date) = YEAR(DATE(:date))")
 	SpendingCheckMonth findByDate(LocalDateTime date);
+
+	@Transactional
+	@Modifying
+	@Query(value = 
+			  " UPDATE spending_check_month scm "
+			+ "	SET is_checked = true "
+			+ "	WHERE ("
+			+ "	("
+			+ "		SELECT count(s1.id) "
+			+ "		FROM spending s1"
+			+ "		WHERE extract(month FROM s1.date) = extract(month FROM scm.date) AND extract(year FROM s1.date) = extract(year FROM scm.date)"
+			+ "		AND s1.type in (1, 3, 4)"
+			+ "		AND s1.id not in ("
+			+ "			SELECT ss1.id FROM spending ss1"
+			+ "			INNER JOIN spending sg1 on sg1.id = ss1.id_spending_group_association "
+			+ "			WHERE sg1.type = 4"
+			+ "			AND ss1.type in (1, 3)"
+			+ "			AND extract(month FROM ss1.date) = extract(month FROM s1.date) AND extract(year FROM ss1.date) = extract(year FROM s1.date)"
+			+ "			AND extract(month FROM ss1.date) = extract(month FROM s1.date) AND extract(year FROM ss1.date) = extract(year FROM s1.date)"
+			+ "		)"
+			+ "		GROUP BY extract(month FROM s1.date), extract(year FROM s1.date)"
+			+ "	)"
+			+ "="
+			+ "	("
+			+ "		("
+			+ "			SELECT count(s2.id) "
+			+ "			FROM spending s2"
+			+ "			INNER JOIN spending_credit_card_spending sccs on sccs.id_spending = s2.id"
+			+ "			WHERE extract(month FROM s2.date) = extract(month FROM scm.date) AND extract(year FROM s2.date) = extract(year FROM scm.date) "
+			+ "			GROUP BY extract(month FROM s2.date), extract(year FROM s2.date)"
+			+ "		 )"
+			+ "		+"
+			+ "		("
+			+ "			SELECT count(s3.id) "
+			+ "			FROM spending s3"
+			+ "			INNER JOIN spending_check sc on sc.id_spending = s3.id"
+			+ "			WHERE extract(month FROM s3.date) = extract(month FROM scm.date) AND extract(year FROM s3.date) = extract(year FROM scm.date)"
+			+ "			GROUP BY extract(month FROM s3.date), extract(year FROM s3.date)"
+			+ "		)"
+			+ "	)"
+			+ ")"
+			+ "	AND scm.is_checked = false", nativeQuery = true)
+	void updateCheckMonthStatus();
 	
 }

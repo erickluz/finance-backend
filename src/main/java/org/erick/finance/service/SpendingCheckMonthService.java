@@ -27,6 +27,7 @@ import org.erick.finance.repository.SpendingCheckMonthRepository;
 import org.erick.finance.repository.SpendingCheckRepository;
 import org.erick.finance.repository.SpendingCreditCardSpendingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +48,8 @@ public class SpendingCheckMonthService {
 	private CreditCardSpendingService creditCardSpendingService;
 	
 	public List<SpendingCheckMonth> listAll() {
-		return rep.findAll();
+		this.updateCheckMonthStatus();
+		return rep.findAll(Sort.by(Sort.Direction.ASC, "date"));
 	}
 	
 	public SpendingCheckMonth save(SpendingCheckMonth spendingCheckMonth) {
@@ -247,5 +249,8 @@ public class SpendingCheckMonthService {
 		
 	}
 	
+	public void updateCheckMonthStatus() {
+		rep.updateCheckMonthStatus();
+	}
 	
 }
